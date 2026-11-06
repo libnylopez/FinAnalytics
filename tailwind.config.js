@@ -42,6 +42,7 @@ export default {
           DEFAULT: token('rajil'),
           ink: token('rajil-ink'),
         },
+        lake: token('lake'),
         chart: {
           1: token('chart-1'),
           2: token('chart-2'),

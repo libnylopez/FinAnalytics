@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { formatMoney, formatPayback } from '../utils/format';
 
 /**
@@ -10,8 +10,8 @@ import { formatMoney, formatPayback } from '../utils/format';
  * durante 240 ms; las cifras del tooltip y de las etiquetas siempre son los valores reales.
  */
 
-const HEIGHT = 248;
-const PAD = { top: 26, right: 16, bottom: 32, left: 68 };
+const HEIGHT = 262;
+const PAD = { top: 38, right: 16, bottom: 32, left: 68 };
 const BAR_MAX = 24;
 const RADIUS = 4;
 const TOOLTIP_W = 220;
@@ -90,6 +90,7 @@ function useTweened(values) {
 
 export default function CashFlowChart({ years, annual, cumulative, paybackYears, paybackRecovered, symbol }) {
   const [ref, width] = useWidth();
+  const gid = useId().replace(/:/g, '');
   const [hover, setHover] = useState(null);
   const shownAnnual = useTweened(annual);
   const shownCumulative = useTweened(cumulative);
@@ -113,14 +114,19 @@ export default function CashFlowChart({ years, annual, cumulative, paybackYears,
   const cx = (i) => PAD.left + band * i + band / 2;
 
   const linePoints = shownCumulative.map((v, i) => `${cx(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  // Lavado suave bajo el acumulado, hasta la línea de cero (≈10 % de opacidad)
+  const areaPath =
+    `M${cx(0).toFixed(1)},${y(0).toFixed(1)} ` +
+    shownCumulative.map((v, i) => `L${cx(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ') +
+    ` L${cx(shownCumulative.length - 1).toFixed(1)},${y(0).toFixed(1)} Z`;
   const last = cumulative.length - 1;
 
   const showPayback = paybackRecovered && paybackYears > 0 && paybackYears <= years.length - 1;
   const paybackX = showPayback ? cx(0) + band * paybackYears : 0;
-  const paybackLabel = `Recupera en ${formatPayback(paybackYears, true)}`;
+  const paybackLabel = `Recuperación · ${formatPayback(paybackYears, true)}`;
   // La etiqueta se coloca del lado donde cabe; si no cabe en ninguno se omite
   // (la descripción de la tarjeta ya indica el período de recuperación).
-  const LABEL_W = 132;
+  const LABEL_W = 166;
   const fitsRight = paybackX + 8 + LABEL_W <= width - PAD.right;
   const fitsLeft = paybackX - 8 - LABEL_W >= PAD.left;
   const labelRight = !fitsRight && fitsLeft;
@@ -182,15 +188,28 @@ export default function CashFlowChart({ years, annual, cumulative, paybackYears,
             <g>
               <line x1={paybackX} x2={paybackX} y1={PAD.top - 6} y2={y(0)} stroke="rgb(var(--ink-3))" strokeWidth="1" strokeOpacity="0.8" shapeRendering="crispEdges" />
               <circle cx={paybackX} cy={y(0)} r="3" fill="rgb(var(--ink))" />
-              {showPaybackLabel && <text
-                x={paybackX + (labelRight ? -8 : 8)}
-                y={PAD.top - 6}
-                dy="0.75em"
-                textAnchor={labelRight ? 'end' : 'start'}
-                className="fill-ink text-caption font-medium"
-              >
-                {paybackLabel}
-              </text>}
+              {showPaybackLabel && (
+                <g>
+                  <rect
+                    x={labelRight ? paybackX - 8 - LABEL_W : paybackX + 8}
+                    y={PAD.top - 14}
+                    width={LABEL_W}
+                    height="24"
+                    rx="8"
+                    fill="rgb(var(--surface))"
+                    stroke="rgb(var(--line-strong))"
+                  />
+                  <text
+                    x={(labelRight ? paybackX - 8 - LABEL_W : paybackX + 8) + LABEL_W / 2}
+                    y={PAD.top - 2}
+                    dy="0.35em"
+                    textAnchor="middle"
+                    className="fill-ink text-caption font-semibold table-number"
+                  >
+                    {paybackLabel}
+                  </text>
+                </g>
+              )}
             </g>
           )}
 
@@ -206,6 +225,13 @@ export default function CashFlowChart({ years, annual, cumulative, paybackYears,
           ))}
 
           {/* Flujo acumulado */}
+          <defs>
+            <linearGradient id={`wash-${gid}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="rgb(var(--chart-2))" stopOpacity="0.14" />
+              <stop offset="1" stopColor="rgb(var(--chart-2))" stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          <path d={areaPath} fill={`url(#wash-${gid})`} />
           <polyline points={linePoints} fill="none" stroke="rgb(var(--chart-2))" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
           {shownCumulative.map((v, i) => (
             <circle
@@ -223,9 +249,20 @@ export default function CashFlowChart({ years, annual, cumulative, paybackYears,
           {/* Etiqueta directa selectiva: valor final del acumulado */}
           {!compact && (
             <>
-              <text x={cx(last)} y={y(cumulative[last]) - 12} textAnchor="middle" className="fill-ink text-caption font-semibold table-number">
-                {compactMoney(cumulative[last], symbol)}
-              </text>
+              <g>
+                <rect
+                  x={cx(last) - 30}
+                  y={y(shownCumulative[last]) - 36}
+                  width="60"
+                  height="22"
+                  rx="7"
+                  fill="rgb(var(--chart-2) / 0.12)"
+                  stroke="rgb(var(--chart-2) / 0.35)"
+                />
+                <text x={cx(last)} y={y(shownCumulative[last]) - 25} dy="0.35em" textAnchor="middle" className="fill-ink text-caption font-semibold table-number">
+                  {compactMoney(cumulative[last], symbol)}
+                </text>
+              </g>
             </>
           )}
 

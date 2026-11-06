@@ -9,6 +9,7 @@ import InvestmentEvaluationView from './components/InvestmentEvaluationView';
 import ReportsView from './components/ReportsView';
 import TeamModal from './components/TeamModal';
 import useTheme from './hooks/useTheme';
+import AtitlanLandscape from './components/brand/AtitlanLandscape';
 
 import {
   defaultFinancialInputs,
@@ -126,7 +127,15 @@ export default function App() {
         onOpenTeamModal={() => setIsTeamModalOpen(true)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="relative flex-1 flex flex-col min-w-0">
+        {/* Lago de Atitlán: identidad discreta detrás del encabezado del Resumen (estático, decorativo) */}
+        {activeTab === 'dashboard' && (
+          <AtitlanLandscape
+            layers="premium"
+            fit="meet"
+            className="hidden md:block absolute top-0 right-0 w-[min(1120px,92%)] h-[182px] animate-fade-in print:hidden"
+          />
+        )}
         <Header
           title={activeTitle}
           companyData={inputs}
@@ -137,7 +146,7 @@ export default function App() {
           onOpenTeamModal={() => setIsTeamModalOpen(true)}
         />
 
-        <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-8 pt-2 pb-16 print:p-0 print:max-w-none">
+        <main className="relative flex-1 w-full max-w-6xl mx-auto px-4 sm:px-8 pt-2 pb-16 print:p-0 print:max-w-none">
           {/* Cada módulo entra con un fundido breve; la clave reinicia la animación al cambiar de sección */}
           <div key={activeTab} className="animate-rise-in print:animate-none">
           {activeTab === 'dashboard' && (

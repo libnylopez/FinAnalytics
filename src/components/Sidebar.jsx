@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { RajilMark, RajilWordmark } from './brand/RajilLogo';
 import useIndicator from '../hooks/useIndicator';
+import AtitlanLandscape from './brand/AtitlanLandscape';
 
 export const MENU_ITEMS = [
   { id: 'dashboard', label: 'Resumen', icon: LayoutDashboard },
@@ -78,6 +79,17 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenTeamModal }) {
           );
         })}
       </nav>
+
+      {/* Origen del proyecto: UVG Campus Sololá, con el Lago de Atitlán simplificado */}
+      <div className="hidden lg:block px-4 pb-3">
+        <div className="relative h-[92px] rounded-[14px] border border-line bg-gradient-to-b from-surface to-surface-2 overflow-hidden">
+          <AtitlanLandscape layers="premium" fade="none" className="absolute inset-x-0 bottom-0 w-full h-[72px]" />
+          <div className="relative px-3.5 pt-3">
+            <div className="text-footnote font-semibold text-ink">UVG</div>
+            <div className="text-caption text-ink-2">Campus Sololá</div>
+          </div>
+        </div>
+      </div>
 
       {/* Información del proyecto */}
       <div className="hidden lg:block px-4 py-4 border-t border-line">

@@ -1,18 +1,10 @@
 import React from 'react';
-import { ArrowRight, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle2, XCircle, Wallet, TrendingUp, Percent, Clock3 } from 'lucide-react';
 import Panel from './ui/Panel';
 import Button from './ui/Button';
 import StatusLabel, { StatusIcon } from './ui/StatusLabel';
 import CashFlowChart from './CashFlowChart';
 import { formatMoney, formatMoneyString, formatPercent, formatPayback, isNegativeAmount } from '../utils/format';
-
-// Separadores de la cuadrícula de indicadores: 1 columna (móvil), 2 (tableta) y 4 (escritorio)
-const KPI_BORDERS = [
-  '',
-  'border-t sm:border-t-0 sm:border-l',
-  'border-t lg:border-t-0 lg:border-l',
-  'border-t sm:border-l lg:border-t-0'
-];
 
 export default function DashboardOverview({
   inputs,
@@ -34,9 +26,10 @@ export default function DashboardOverview({
 
   // Cada indicador muestra su criterio de decisión: el icono y el texto dicen si se cumple.
   const kpis = [
-    { label: 'Inversión inicial', value: money(initialCost), note: 'Activos fijos y capital de trabajo' },
+    { label: 'Inversión inicial', icon: Wallet, value: money(initialCost), note: 'Activos fijos y capital de trabajo' },
     {
       label: 'Valor presente neto',
+      icon: TrendingUp,
       value: money(npv),
       negative: isNegativeAmount(npv),
       ok: npv > 0,
@@ -44,12 +37,14 @@ export default function DashboardOverview({
     },
     {
       label: 'Tasa interna de retorno',
+      icon: Percent,
       value: formatPercent(irr),
       ok: irr > wacc,
       note: irr > wacc ? `Supera el WACC de ${formatPercent(wacc)}` : `No supera el WACC de ${formatPercent(wacc)}`
     },
     {
       label: 'Período de recuperación',
+      icon: Clock3,
       // Texto corto en la tarjeta; el criterio de abajo indica el horizonte
       value: paybackRecovered ? formatPayback(paybackYears, true) : 'No se recupera',
       ok: paybackRecovered,
@@ -70,20 +65,31 @@ export default function DashboardOverview({
 
   return (
     <div className="space-y-6">
-      {/* Dictamen e indicadores de decisión */}
-      <section className="bg-surface border border-line rounded-card shadow-card overflow-hidden" aria-labelledby="verdict-title">
-        <header className="flex flex-wrap items-center justify-between gap-4 px-6 py-5">
+      {/* Dictamen de viabilidad: compacto, con un matiz semántico muy suave */}
+      <section
+        className="relative overflow-hidden bg-surface border border-line rounded-card shadow-card"
+        aria-labelledby="verdict-title"
+      >
+        <span
+          aria-hidden="true"
+          className={`absolute inset-y-0 right-0 w-2/3 pointer-events-none ${
+            isViable
+              ? 'bg-[radial-gradient(ellipse_at_right,rgb(var(--positive)/0.07),transparent_70%)]'
+              : 'bg-[radial-gradient(ellipse_at_right,rgb(var(--negative)/0.07),transparent_70%)]'
+          }`}
+        />
+        <div className="relative flex flex-wrap items-center justify-between gap-4 px-6 py-5">
           <div className="flex items-center gap-4 min-w-0">
             <span
-              className={`w-11 h-11 rounded-full grid place-items-center shrink-0 ${
-                isViable ? 'bg-positive/10 text-positive' : 'bg-negative/10 text-negative'
+              className={`w-12 h-12 rounded-2xl grid place-items-center shrink-0 ring-1 ring-inset ${
+                isViable ? 'bg-positive/10 text-positive ring-positive/15' : 'bg-negative/10 text-negative ring-negative/15'
               }`}
             >
-              <VerdictIcon className="w-[22px] h-[22px]" strokeWidth={2.2} aria-hidden="true" />
+              <VerdictIcon className="w-6 h-6" strokeWidth={2.2} aria-hidden="true" />
             </span>
             <div className="min-w-0">
               <div className="text-footnote font-medium text-ink-2">Dictamen de viabilidad</div>
-              <h2 id="verdict-title" className="font-display text-[20px] leading-7 font-bold tracking-[-0.015em] text-ink">
+              <h2 id="verdict-title" className="font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">
                 {isViable ? 'Proyecto viable' : 'Proyecto no viable'}
               </h2>
               <p className="text-callout text-ink-2 mt-0.5">
@@ -97,16 +103,25 @@ export default function DashboardOverview({
             Ver evaluación
             <ArrowRight className="w-4 h-4 transition-transform duration-180 ease-out group-hover:translate-x-0.5" />
           </Button>
-        </header>
+        </div>
+      </section>
 
-        <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-line">
-          {kpis.map((kpi, i) => (
-            <div key={kpi.label} className={`px-6 pt-5 pb-6 border-line ${KPI_BORDERS[i]}`}>
-              <dt className="text-footnote font-medium text-ink-2">{kpi.label}</dt>
-              <dd className={`mt-2 font-display text-figure font-bold ${kpi.negative ? 'text-negative' : 'text-ink'}`}>
+      {/* Indicadores de decisión: tarjetas independientes; el color solo marca el criterio */}
+      <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpis.map((kpi) => {
+          const Icon = kpi.icon;
+          return (
+            <div key={kpi.label} className="bg-surface border border-line rounded-card shadow-card px-5 pt-5 pb-5">
+              <dt className="flex items-center gap-2.5 text-footnote font-medium text-ink-2">
+                <span className="w-8 h-8 rounded-[10px] bg-accent/[0.08] text-accent grid place-items-center shrink-0">
+                  <Icon className="w-4 h-4" strokeWidth={2.1} aria-hidden="true" />
+                </span>
+                {kpi.label}
+              </dt>
+              <dd className={`mt-4 font-display text-[28px] leading-9 tracking-[-0.03em] font-bold whitespace-nowrap ${kpi.negative ? 'text-negative' : 'text-ink'}`}>
                 {kpi.value}
               </dd>
-              <dd className="mt-2.5 flex items-center gap-1.5 text-footnote text-ink-2">
+              <dd className="mt-2 flex items-center gap-1.5 text-footnote text-ink-2">
                 {kpi.ok !== undefined && <StatusIcon status={kpi.ok ? 'optimal' : 'danger'} className="w-4 h-4" />}
                 <span>
                   {kpi.ok !== undefined && <span className="sr-only">{kpi.ok ? 'Cumple: ' : 'No cumple: '}</span>}
@@ -114,9 +129,9 @@ export default function DashboardOverview({
                 </span>
               </dd>
             </div>
-          ))}
-        </dl>
-      </section>
+          );
+        })}
+      </dl>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Perfil del flujo de caja */}
