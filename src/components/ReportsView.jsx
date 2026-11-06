@@ -136,6 +136,7 @@ export default function ReportsView({
 
         <section className="avoid-break">
           <SectionTitle number={2}>Indicadores de decisión</SectionTitle>
+          <div className="overflow-x-auto print:overflow-visible">
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="border-b border-slate-400 text-slate-600">
@@ -156,6 +157,7 @@ export default function ReportsView({
               ))}
             </tbody>
           </table>
+          </div>
         </section>
 
         <section className="avoid-break">

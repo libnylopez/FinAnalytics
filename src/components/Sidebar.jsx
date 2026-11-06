@@ -24,7 +24,11 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenTeamModal }) {
       {/* Identificación */}
       <div className="px-5 pt-5 pb-4 lg:border-b border-slate-200">
         <div className="text-base font-bold tracking-tight text-navy-900">FinAnalytics</div>
-        <div className="text-xs text-slate-500 mt-0.5">Contabilidad Financiera · UVG Sololá</div>
+        <div className="text-xs text-slate-500 mt-0.5 leading-snug">
+          <span>Contabilidad Financiera</span>
+          <span className="lg:hidden"> · </span>
+          <span className="lg:block">UVG Sololá</span>
+        </div>
       </div>
 
       {/* Navegación */}

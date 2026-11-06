@@ -72,14 +72,17 @@ export default function FinancialStatementsView({ incomeStatement, cashFlow, cur
             </thead>
             <tbody>
               {data.rows.map((row) => {
+                const isHeading = row.isTotal || row.isSubtotal || row.isBold;
                 const rowClass = row.isTotal
                   ? 'font-semibold text-slate-900 border-t border-slate-400'
                   : row.isSubtotal
                   ? 'font-semibold text-slate-900 border-t border-slate-200'
+                  : row.isBold
+                  ? 'font-medium text-slate-900'
                   : 'text-slate-700';
                 return (
                   <tr key={row.id} className={`${rowClass} hover:bg-slate-50`}>
-                    <td className={`py-2 px-5 ${!row.isTotal && !row.isSubtotal ? 'pl-8' : ''}`}>{row.label}</td>
+                    <td className={`py-2 px-5 ${isHeading ? '' : 'pl-8'}`}>{row.label}</td>
                     {showFormulas && (
                       <td className="py-2 px-4 text-xs font-normal text-slate-500">{row.formula}</td>
                     )}
