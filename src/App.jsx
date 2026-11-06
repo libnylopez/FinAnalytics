@@ -8,6 +8,7 @@ import RatiosDashboardView from './components/RatiosDashboardView';
 import InvestmentEvaluationView from './components/InvestmentEvaluationView';
 import ReportsView from './components/ReportsView';
 import TeamModal from './components/TeamModal';
+import useTheme from './hooks/useTheme';
 
 import {
   defaultFinancialInputs,
@@ -31,6 +32,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [currency, setCurrency] = useState('GTQ');
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const { preference: theme, setPreference: setTheme } = useTheme();
 
   // Estado central de entradas de la empresa
   const [inputs, setInputs] = useState(() => {
@@ -117,7 +119,7 @@ export default function App() {
   const activeTitle = MENU_ITEMS.find((item) => item.id === activeTab)?.label;
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-slate-100 font-sans antialiased text-slate-900 print:bg-white">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-canvas text-ink print:bg-white">
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -130,14 +132,17 @@ export default function App() {
           companyData={inputs}
           currency={currency}
           setCurrency={setCurrency}
+          theme={theme}
+          setTheme={setTheme}
           onOpenTeamModal={() => setIsTeamModalOpen(true)}
         />
 
-        <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-8 py-6 sm:py-8 print:p-0 print:max-w-none">
+        <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-8 pt-6 pb-12 print:p-0 print:max-w-none">
           {activeTab === 'dashboard' && (
             <DashboardOverview
               inputs={inputs}
               ratios={ratios}
+              cashFlow={cashFlow}
               validations={validations}
               investmentEvaluation={investmentEvaluation}
               currencySymbol={currencySymbol}
