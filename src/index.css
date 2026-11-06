@@ -2,10 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom smooth transitions and scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: #f1f5f9;
@@ -18,6 +17,36 @@
   background: #94a3b8;
 }
 
+/* Cifras alineadas en columnas */
 .table-number {
   font-variant-numeric: tabular-nums;
+}
+
+/* Campos numéricos sin flechas del navegador */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* Impresión: solo se imprime el contenido de la pantalla activa */
+@media print {
+  @page {
+    size: letter;
+    margin: 16mm 14mm;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+  }
+  table {
+    page-break-inside: auto;
+  }
+  tr,
+  .avoid-break {
+    page-break-inside: avoid;
+  }
 }

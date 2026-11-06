@@ -7,6 +7,16 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Color principal de la interfaz (azul marino)
+        navy: {
+          50: '#f2f5f9',
+          100: '#e1e8f1',
+          200: '#c3d1e2',
+          600: '#2f5582',
+          700: '#22436a',
+          800: '#1a3554',
+          900: '#122741',
+        },
         brand: {
           50: '#f0f7ff',
           100: '#e0effe',
