@@ -35,6 +35,11 @@ export default {
         positive: token('positive'),
         negative: token('negative'),
         warning: token('warning'),
+        // Identidad RAJIL
+        rajil: {
+          DEFAULT: token('rajil'),
+          ink: token('rajil-ink'),
+        },
         chart: {
           1: token('chart-1'),
           2: token('chart-2'),

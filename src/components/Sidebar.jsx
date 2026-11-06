@@ -6,9 +6,9 @@ import {
   Scale,
   Calculator,
   FileText,
-  Users,
-  BarChart3
+  Users
 } from 'lucide-react';
+import { RajilMark, RajilWordmark } from './brand/RajilLogo';
 
 export const MENU_ITEMS = [
   { id: 'dashboard', label: 'Resumen', icon: LayoutDashboard },
@@ -28,11 +28,12 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenTeamModal }) {
     <aside className="bg-sidebar border-b lg:border-b-0 lg:border-r border-line flex flex-col shrink-0 lg:w-64 lg:h-screen lg:sticky lg:top-0 print:hidden">
       {/* Identidad */}
       <div className="flex items-center gap-3 px-5 pt-5 pb-4 lg:pt-6 lg:pb-6">
-        <div className="w-8 h-8 rounded-[9px] bg-primary text-white grid place-items-center shadow-sm shrink-0" aria-hidden="true">
-          <BarChart3 className="w-[18px] h-[18px]" strokeWidth={2.25} />
-        </div>
+        <RajilMark size={34} />
         <div className="min-w-0 leading-tight">
-          <div className="text-[15px] font-semibold tracking-tight text-ink">FinAnalytics</div>
+          <div className="pt-0.5 pb-[3px]">
+            <RajilWordmark capHeight={12} />
+            <span className="sr-only">RAJIL</span>
+          </div>
           <div className="text-xs text-ink-2 mt-0.5">Contabilidad Financiera · UVG</div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import Button from './ui/Button';
+import { RajilMark } from './brand/RajilLogo';
 
 export default function TeamModal({ isOpen, onClose, projectInfo }) {
   const closeRef = useRef(null);
@@ -35,13 +36,16 @@ export default function TeamModal({ isOpen, onClose, projectInfo }) {
         onClick={(e) => e.stopPropagation()}
       >
         <header className="flex items-start justify-between gap-4 px-6 pt-5 pb-4 border-b border-line">
-          <div>
-            <h2 id="team-modal-title" className="text-[17px] font-semibold text-ink">
-              Equipo del proyecto
-            </h2>
-            <p className="text-[13px] text-ink-2 mt-0.5">
-              {projectInfo.university} · {projectInfo.campus}
-            </p>
+          <div className="flex items-center gap-3">
+            <RajilMark size={30} />
+            <div>
+              <h2 id="team-modal-title" className="text-[17px] font-semibold text-ink">
+                Equipo del proyecto RAJIL
+              </h2>
+              <p className="text-[13px] text-ink-2 mt-0.5">
+                {projectInfo.university} · {projectInfo.campus}
+              </p>
+            </div>
           </div>
           <button
             ref={closeRef}

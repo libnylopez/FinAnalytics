@@ -1,6 +1,7 @@
 import React from 'react';
 import { FileSpreadsheet, Printer } from 'lucide-react';
 import Button from './ui/Button';
+import RajilLogo from './brand/RajilLogo';
 import { exportToCSV } from '../utils/financialEngine';
 import { formatMoney, formatPercent, formatPayback } from '../utils/format';
 
@@ -59,7 +60,7 @@ export default function ReportsView({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `FinAnalytics_${inputs.companyName.replace(/\s+/g, '_')}_Reporte.csv`);
+    link.setAttribute('download', `RAJIL_${inputs.companyName.replace(/\s+/g, '_')}_Reporte.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -97,8 +98,8 @@ export default function ReportsView({
       <article className="paper bg-surface text-ink border border-line rounded-card shadow-pop max-w-4xl mx-auto px-6 py-8 sm:px-12 sm:py-12 space-y-8 print:border-0 print:shadow-none print:rounded-none print:p-0 print:max-w-none">
         <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b-2 border-ink pb-4">
           <div>
-            <div className="text-xs uppercase tracking-wide text-ink-2">FinAnalytics</div>
-            <h1 className="text-xl font-bold text-ink mt-0.5">Dictamen financiero</h1>
+            <RajilLogo size={26} />
+            <h1 className="text-xl font-bold text-ink mt-3">Dictamen financiero</h1>
           </div>
           <div className="text-xs text-ink-2 sm:text-right leading-relaxed">
             <div>Universidad del Valle de Guatemala · Campus Sololá</div>
