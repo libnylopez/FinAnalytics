@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import StatusLabel from './ui/StatusLabel';
+import Disclosure from './ui/Disclosure';
 import { formatMoneyString } from '../utils/format';
 
 const CATEGORIES = ['Liquidez', 'Rentabilidad', 'Endeudamiento'];
@@ -24,75 +25,79 @@ export default function RatiosDashboardView({ ratios, currencySymbol }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
-        <p className="text-slate-600">Calculadas con las cifras proyectadas del año 1.</p>
-        <div className="flex flex-wrap items-center gap-4">
-          <StatusLabel status="optimal">{counts.optimal} adecuadas</StatusLabel>
-          <StatusLabel status="warning">{counts.warning} en observación</StatusLabel>
-          <StatusLabel status="danger">{counts.danger} críticas</StatusLabel>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <p className="text-[13px] text-ink-2">Calculadas con las cifras proyectadas del año 1.</p>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Solo se muestran los estados presentes */}
+          {counts.optimal > 0 && <StatusLabel status="optimal">{counts.optimal} adecuadas</StatusLabel>}
+          {counts.warning > 0 && <StatusLabel status="warning">{counts.warning} en observación</StatusLabel>}
+          {counts.danger > 0 && <StatusLabel status="danger">{counts.danger} críticas</StatusLabel>}
         </div>
       </div>
 
-      <section className="bg-white border border-slate-200 rounded-md overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="border-b border-slate-300 text-slate-600">
-              <th scope="col" className="py-2.5 px-5 text-left font-medium">Razón</th>
-              <th scope="col" className="py-2.5 px-4 text-right font-medium whitespace-nowrap">Valor</th>
-              <th scope="col" className="py-2.5 px-4 text-left font-medium whitespace-nowrap">Referencia</th>
-              <th scope="col" className="py-2.5 px-5 text-left font-medium whitespace-nowrap">Diagnóstico</th>
-            </tr>
-          </thead>
-          {CATEGORIES.map((category) => (
-            <tbody key={category}>
-              <tr className="bg-slate-50 border-y border-slate-200">
-                <th colSpan={4} scope="colgroup" className="py-2 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                  {category}
-                </th>
+      <section className="bg-surface border border-line rounded-card shadow-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="text-ink-2 border-b border-line">
+                <th scope="col" className="py-3 px-5 text-left text-xs font-medium">Razón</th>
+                <th scope="col" className="py-3 px-4 text-right text-xs font-medium whitespace-nowrap">Valor</th>
+                <th scope="col" className="py-3 px-4 text-left text-xs font-medium whitespace-nowrap">Referencia</th>
+                <th scope="col" className="py-3 px-5 text-left text-xs font-medium whitespace-nowrap">Diagnóstico</th>
               </tr>
-              {ratios
-                .filter((r) => r.category === category)
-                .map((r) => (
-                  <React.Fragment key={r.code}>
-                    <tr className="border-b border-slate-100 align-top">
-                      <td className="py-3 px-5 min-w-[18rem]">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="font-medium text-slate-900">{r.name}</div>
-                            <p className="text-xs text-slate-500 mt-0.5 max-w-xl">{r.interpretation}</p>
-                          </div>
+            </thead>
+            {CATEGORIES.map((category) => (
+              <tbody key={category}>
+                <tr className="bg-surface-2 border-b border-line">
+                  <th colSpan={4} scope="colgroup" className="py-2 px-5 text-left text-[13px] font-semibold text-ink">
+                    {category}
+                  </th>
+                </tr>
+                {ratios
+                  .filter((r) => r.category === category)
+                  .map((r) => {
+                    const open = !!openFormulas[r.code];
+                    return (
+                      <tr key={r.code} className="border-b border-line last:border-b-0 align-top transition-colors duration-100 hover:bg-surface-2/60">
+                        <td className="py-3.5 px-5 min-w-[18rem]">
+                          <div className="font-medium text-ink">{r.name}</div>
+                          <p className="text-xs text-ink-2 mt-0.5 max-w-xl leading-relaxed">{r.interpretation}</p>
                           <button
                             type="button"
                             onClick={() => toggleFormula(r.code)}
-                            aria-expanded={!!openFormulas[r.code]}
-                            className="shrink-0 inline-flex items-center gap-0.5 text-xs text-navy-700 hover:text-navy-900 cursor-pointer"
+                            aria-expanded={open}
+                            aria-controls={`formula-${r.code}`}
+                            className="mt-1.5 inline-flex items-center gap-0.5 text-xs font-medium text-accent hover:text-accent/80 cursor-pointer transition-colors duration-150 rounded"
                           >
-                            {openFormulas[r.code] ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                            <ChevronRight
+                              className={`w-3.5 h-3.5 transition-transform duration-200 ease-out ${open ? 'rotate-90' : ''}`}
+                              aria-hidden="true"
+                            />
                             Fórmula
                           </button>
-                        </div>
-                        {openFormulas[r.code] && (
-                          <div className="mt-2 text-xs text-slate-700 bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5">
-                            {r.formula}
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-right font-semibold text-slate-900 whitespace-nowrap table-number">
-                        {displayValue(r)}
-                      </td>
-                      <td className="py-3 px-4 text-slate-600 whitespace-nowrap">{r.benchmark}</td>
-                      <td className="py-3 px-5 whitespace-nowrap">
-                        <StatusLabel status={r.status}>{r.statusLabel}</StatusLabel>
-                      </td>
-                    </tr>
-                  </React.Fragment>
-                ))}
-            </tbody>
-          ))}
-        </table>
+                          <Disclosure open={open} id={`formula-${r.code}`}>
+                            <div className="mt-2 inline-block text-xs text-ink bg-surface-2 border border-line rounded-md px-2.5 py-1.5">
+                              {r.formula}
+                            </div>
+                          </Disclosure>
+                        </td>
+                        <td className="py-3.5 px-4 text-right font-semibold text-ink whitespace-nowrap table-number">
+                          {displayValue(r)}
+                        </td>
+                        <td className="py-3.5 px-4 text-ink-2 whitespace-nowrap">{r.benchmark}</td>
+                        <td className="py-3.5 px-5 whitespace-nowrap">
+                          <StatusLabel status={r.status}>{r.statusLabel}</StatusLabel>
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            ))}
+          </table>
+        </div>
       </section>
 
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-ink-2">
         El balance general de referencia (activos, pasivos y patrimonio) se estima a partir de los datos ingresados.
       </p>
     </div>

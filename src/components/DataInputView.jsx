@@ -1,47 +1,59 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, RotateCcw } from 'lucide-react';
+import { ChevronDown, ChevronRight, RotateCcw, Calculator } from 'lucide-react';
 import Panel from './ui/Panel';
 import Button from './ui/Button';
-import { STATUS_STYLES } from './ui/StatusLabel';
+import Disclosure from './ui/Disclosure';
+import { StatusIcon } from './ui/StatusLabel';
 import { formatMoney, formatNumber } from '../utils/format';
 
 const SECTORS = ['Manufactura', 'Comercio', 'Servicios'];
-
-const inputClass =
-  'w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 table-number ' +
-  'focus:outline-none focus:border-navy-600 focus:ring-1 focus:ring-navy-600';
 
 /** Campo con etiqueta y texto de ayuda opcional. */
 function Field({ label, htmlFor, hint, children }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-slate-700 mb-1">
+      <label htmlFor={htmlFor} className="block text-[13px] font-medium text-ink mb-1.5">
         {label}
       </label>
       {children}
-      {hint && <p className="text-xs text-slate-500 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-ink-2 mt-1.5 min-h-[1rem]">{hint}</p>}
     </div>
   );
 }
 
-/** Campo numérico con prefijo (moneda) o sufijo (%, años). */
-function NumberInput({ id, value, onChange, prefix, suffix, step = 'any', min }) {
+/** Lista desplegable nativa con flecha propia. */
+function Select({ id, value, onChange, children, className = '' }) {
+  return (
+    <div className={`relative ${className}`}>
+      <select id={id} value={value} onChange={onChange} className="field-input appearance-none pr-9 cursor-pointer">
+        {children}
+      </select>
+      <ChevronDown className="w-4 h-4 text-ink-2 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
+    </div>
+  );
+}
+
+/** Campo numérico con prefijo (moneda) o sufijo (%). */
+function NumberInput({ id, value, onChange, prefix, suffix, step = 'any', min, invalid = false }) {
   return (
     <div className="relative">
       {prefix && (
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none">{prefix}</span>
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink-2 pointer-events-none">{prefix}</span>
       )}
       <input
         id={id}
         type="number"
+        inputMode="decimal"
         step={step}
         min={min}
         value={value}
+        aria-invalid={invalid || undefined}
         onChange={(e) => onChange(e.target.value)}
-        className={`${inputClass} text-right ${prefix ? 'pl-8' : ''} ${suffix ? 'pr-9' : ''}`}
+        onFocus={(e) => e.target.select()}
+        className={`field-input text-right table-number ${prefix ? 'pl-8' : ''} ${suffix ? 'pr-8' : ''}`}
       />
       {suffix && (
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none">{suffix}</span>
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-ink-2 pointer-events-none">{suffix}</span>
       )}
     </div>
   );
@@ -63,6 +75,14 @@ export default function DataInputView({
 
   const totalInvestment =
     (Number(inputs.machinery) || 0) + (Number(inputs.furniture) || 0) + (Number(inputs.workingCapital) || 0);
+
+  // Resaltado de campos: refleja en el formulario las mismas condiciones que revisa
+  // validateFinancialData (solo presentación; los mensajes provienen del motor).
+  const invalid = {
+    investment: totalInvestment <= 0,
+    costPercentage: (Number(inputs.costPercentage) || 0) >= 100,
+    wacc: (Number(inputs.wacc) || 0) <= 0 || (Number(inputs.wacc) || 0) > 60
+  };
 
   const handleInputChange = (field, value) => {
     setInputs((prev) => ({
@@ -94,29 +114,25 @@ export default function DataInputView({
 
   const salesKeys = ['salesY1', 'salesY2', 'salesY3', 'salesY4', 'salesY5'];
   const totalSales = salesKeys.reduce((sum, key) => sum + (Number(inputs[key]) || 0), 0);
+  const hasProblems = validations.some((v) => v.type !== 'success');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Barra de acciones */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          <label htmlFor="preset" className="text-slate-600">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <label htmlFor="preset" className="text-[13px] text-ink-2">
             Cargar datos de ejemplo
           </label>
-          <select
-            id="preset"
-            value=""
-            onChange={(e) => e.target.value && onSectorPreset(e.target.value)}
-            className="rounded border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-800 focus:outline-none focus:border-navy-600 focus:ring-1 focus:ring-navy-600 cursor-pointer"
-          >
+          <Select id="preset" value="" onChange={(e) => e.target.value && onSectorPreset(e.target.value)} className="w-48">
             <option value="">Seleccionar sector…</option>
             {SECTORS.map((sec) => (
               <option key={sec} value={sec}>
                 {sec}
               </option>
             ))}
-          </select>
-          <span className="text-xs text-slate-500">Datos simulados con fines académicos.</span>
+          </Select>
+          <span className="text-xs text-ink-2">Datos simulados con fines académicos.</span>
         </div>
         <Button onClick={onResetDefaults}>
           <RotateCcw className="w-4 h-4" />
@@ -124,18 +140,18 @@ export default function DataInputView({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
         {/* Formulario */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-5">
           <Panel title="Información de la empresa">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
               <Field label="Nombre o razón social" htmlFor="companyName">
                 <input
                   id="companyName"
                   type="text"
                   value={inputs.companyName}
                   onChange={(e) => handleInputChange('companyName', e.target.value)}
-                  className={inputClass}
+                  className="field-input"
                 />
               </Field>
               <Field label="NIT" htmlFor="nit">
@@ -144,7 +160,7 @@ export default function DataInputView({
                   type="text"
                   value={inputs.nit}
                   onChange={(e) => handleInputChange('nit', e.target.value)}
-                  className={inputClass}
+                  className="field-input"
                 />
               </Field>
               <Field label="Ubicación" htmlFor="location">
@@ -153,22 +169,17 @@ export default function DataInputView({
                   type="text"
                   value={inputs.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
-                  className={inputClass}
+                  className="field-input"
                 />
               </Field>
               <Field label="Sector económico" htmlFor="sector">
-                <select
-                  id="sector"
-                  value={inputs.sector}
-                  onChange={(e) => handleInputChange('sector', e.target.value)}
-                  className={`${inputClass} cursor-pointer`}
-                >
+                <Select id="sector" value={inputs.sector} onChange={(e) => handleInputChange('sector', e.target.value)}>
                   {SECTORS.map((sec) => (
                     <option key={sec} value={sec}>
                       {sec}
                     </option>
                   ))}
-                </select>
+                </Select>
               </Field>
             </div>
           </Panel>
@@ -176,13 +187,13 @@ export default function DataInputView({
           <Panel title="Inversión inicial" description="Desembolso del año 0 para la puesta en marcha.">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Field label="Maquinaria y equipo" htmlFor="machinery">
-                <NumberInput id="machinery" prefix={currencySymbol} min="0" value={inputs.machinery} onChange={(v) => handleInputChange('machinery', v)} />
+                <NumberInput id="machinery" prefix={currencySymbol} min="0" invalid={invalid.investment} value={inputs.machinery} onChange={(v) => handleInputChange('machinery', v)} />
               </Field>
               <Field label="Mobiliario e instalaciones" htmlFor="furniture">
-                <NumberInput id="furniture" prefix={currencySymbol} min="0" value={inputs.furniture} onChange={(v) => handleInputChange('furniture', v)} />
+                <NumberInput id="furniture" prefix={currencySymbol} min="0" invalid={invalid.investment} value={inputs.furniture} onChange={(v) => handleInputChange('furniture', v)} />
               </Field>
               <Field label="Capital de trabajo" htmlFor="workingCapital">
-                <NumberInput id="workingCapital" prefix={currencySymbol} min="0" value={inputs.workingCapital} onChange={(v) => handleInputChange('workingCapital', v)} />
+                <NumberInput id="workingCapital" prefix={currencySymbol} min="0" invalid={invalid.investment} value={inputs.workingCapital} onChange={(v) => handleInputChange('workingCapital', v)} />
               </Field>
             </div>
           </Panel>
@@ -191,9 +202,10 @@ export default function DataInputView({
             title="Proyección de ventas"
             description="Ventas anuales estimadas para los 5 años del horizonte."
             actions={
-              <span className="text-sm text-slate-500">
-                Total: <span className="font-medium text-slate-800 table-number">{formatMoney(totalSales, currencySymbol)}</span>
-              </span>
+              <div className="text-right">
+                <div className="text-xs text-ink-2">Total 5 años</div>
+                <div className="text-sm font-semibold text-ink table-number">{formatMoney(totalSales, currencySymbol)}</div>
+              </div>
             }
           >
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
@@ -206,7 +218,7 @@ export default function DataInputView({
                     key={key}
                     label={`Año ${idx + 1}`}
                     htmlFor={key}
-                    hint={growth !== null ? `${growth >= 0 ? '+' : ''}${formatNumber(growth, 1)}% vs. año ${idx}` : ' '}
+                    hint={growth !== null ? `${growth >= 0 ? '+' : ''}${formatNumber(growth, 1)}% vs. año ${idx}` : ' '}
                   >
                     <NumberInput id={key} prefix={currencySymbol} min="0" value={inputs[key]} onChange={(v) => handleInputChange(key, v)} />
                   </Field>
@@ -215,19 +227,23 @@ export default function DataInputView({
             </div>
 
             {/* Asistente de proyección */}
-            <div className="mt-5 border-t border-slate-200 pt-4">
+            <div className="mt-5 border-t border-line pt-4">
               <button
                 type="button"
                 onClick={() => setShowAssistant(!showAssistant)}
                 aria-expanded={showAssistant}
-                className="flex items-center gap-1.5 text-sm font-medium text-navy-700 hover:text-navy-900 cursor-pointer"
+                aria-controls="sales-assistant"
+                className="flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent/80 cursor-pointer transition-colors duration-150 rounded"
               >
-                {showAssistant ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                <ChevronRight
+                  className={`w-4 h-4 transition-transform duration-200 ease-out ${showAssistant ? 'rotate-90' : ''}`}
+                  aria-hidden="true"
+                />
                 Calcular a partir de precio, unidades y crecimiento
               </button>
 
-              {showAssistant && (
-                <div className="mt-4 rounded border border-slate-200 bg-slate-50 p-4 space-y-4">
+              <Disclosure open={showAssistant} id="sales-assistant">
+                <div className="mt-4 rounded-xl bg-surface-2 border border-line p-4 space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <Field label="Precio promedio por unidad" htmlFor="unitPrice">
                       <NumberInput id="unitPrice" prefix={currencySymbol} step="0.01" min="0" value={unitPrice} onChange={setUnitPrice} />
@@ -241,8 +257,8 @@ export default function DataInputView({
                     </Field>
                     <Field label="Crecimiento anual" htmlFor="growthRate">
                       <NumberInput id="growthRate" suffix="%" step="1" value={growthRate} onChange={setGrowthRate} />
-                      <div className="mt-1.5 flex items-center gap-1 text-xs">
-                        <span className="text-slate-500 mr-1">Aplicar:</span>
+                      <div className="mt-2 flex items-center gap-1.5 text-xs">
+                        <span className="text-ink-2 mr-0.5">Aplicar</span>
                         {[10, 15, 20].map((rate) => (
                           <button
                             key={rate}
@@ -251,7 +267,7 @@ export default function DataInputView({
                               setGrowthRate(rate);
                               handleAutoProjectSales(unitPrice, monthlyUnitsY1, rate);
                             }}
-                            className="px-2 py-0.5 rounded border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 cursor-pointer"
+                            className="h-6 px-2 rounded-md border border-line-strong bg-surface text-ink hover:bg-surface-2 cursor-pointer transition-colors duration-150 table-number"
                           >
                             {rate}%
                           </button>
@@ -260,22 +276,23 @@ export default function DataInputView({
                     </Field>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-ink-2">
                       Año 1 = unidades × 12 × precio. Cada año siguiente = año anterior × (1 + crecimiento).
                     </p>
                     <Button variant="primary" onClick={() => handleAutoProjectSales()}>
+                      <Calculator className="w-4 h-4" />
                       Calcular proyección
                     </Button>
                   </div>
                 </div>
-              )}
+              </Disclosure>
             </div>
           </Panel>
 
           <Panel title="Costos y gastos">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Field label="Costo de ventas" htmlFor="costPercentage" hint="Porcentaje sobre las ventas">
-                <NumberInput id="costPercentage" suffix="%" step="0.1" min="0" value={inputs.costPercentage} onChange={(v) => handleInputChange('costPercentage', v)} />
+                <NumberInput id="costPercentage" suffix="%" step="0.1" min="0" invalid={invalid.costPercentage} value={inputs.costPercentage} onChange={(v) => handleInputChange('costPercentage', v)} />
               </Field>
               <Field label="Gastos de administración" htmlFor="adminExpenses" hint="Anual; crece 5% por año">
                 <NumberInput id="adminExpenses" prefix={currencySymbol} min="0" value={inputs.adminExpenses} onChange={(v) => handleInputChange('adminExpenses', v)} />
@@ -286,27 +303,29 @@ export default function DataInputView({
             </div>
           </Panel>
 
-          <Panel title="Financiamiento">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Préstamo bancario" htmlFor="bankDebt" hint="Se amortiza 20% por año">
-                <NumberInput id="bankDebt" prefix={currencySymbol} min="0" value={inputs.bankDebt} onChange={(v) => handleInputChange('bankDebt', v)} />
-              </Field>
-              <Field label="Tasa de interés anual" htmlFor="interestRate">
-                <NumberInput id="interestRate" suffix="%" step="0.1" min="0" value={inputs.interestRate} onChange={(v) => handleInputChange('interestRate', v)} />
-              </Field>
-            </div>
-          </Panel>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Panel title="Financiamiento">
+              <div className="grid grid-cols-1 gap-4">
+                <Field label="Préstamo bancario" htmlFor="bankDebt" hint="Se amortiza 20% por año">
+                  <NumberInput id="bankDebt" prefix={currencySymbol} min="0" value={inputs.bankDebt} onChange={(v) => handleInputChange('bankDebt', v)} />
+                </Field>
+                <Field label="Tasa de interés anual" htmlFor="interestRate">
+                  <NumberInput id="interestRate" suffix="%" step="0.1" min="0" value={inputs.interestRate} onChange={(v) => handleInputChange('interestRate', v)} />
+                </Field>
+              </div>
+            </Panel>
 
-          <Panel title="Parámetros financieros">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Tasa de descuento (WACC)" htmlFor="wacc" hint="Rendimiento mínimo exigido; se usa para el VPN">
-                <NumberInput id="wacc" suffix="%" step="0.1" value={inputs.wacc} onChange={(v) => handleInputChange('wacc', v)} />
-              </Field>
-              <Field label="Impuesto sobre la renta (ISR)" htmlFor="taxRate">
-                <NumberInput id="taxRate" suffix="%" step="0.1" min="0" value={inputs.taxRate} onChange={(v) => handleInputChange('taxRate', v)} />
-              </Field>
-            </div>
-          </Panel>
+            <Panel title="Parámetros financieros">
+              <div className="grid grid-cols-1 gap-4">
+                <Field label="Tasa de descuento (WACC)" htmlFor="wacc" hint="Rendimiento mínimo exigido; se usa para el VPN">
+                  <NumberInput id="wacc" suffix="%" step="0.1" invalid={invalid.wacc} value={inputs.wacc} onChange={(v) => handleInputChange('wacc', v)} />
+                </Field>
+                <Field label="Impuesto sobre la renta (ISR)" htmlFor="taxRate">
+                  <NumberInput id="taxRate" suffix="%" step="0.1" min="0" value={inputs.taxRate} onChange={(v) => handleInputChange('taxRate', v)} />
+                </Field>
+              </div>
+            </Panel>
+          </div>
 
           <div className="flex justify-end">
             <Button variant="primary" onClick={() => onNavigate('statements')}>
@@ -317,37 +336,37 @@ export default function DataInputView({
         </div>
 
         {/* Columna lateral: resumen y validación */}
-        <div className="space-y-6 lg:sticky lg:top-6">
+        <div className="space-y-5 lg:sticky lg:top-6">
           <Panel title="Inversión inicial">
-            <dl className="space-y-2 text-sm">
+            <dl className="space-y-2.5 text-sm">
               {[
                 ['Maquinaria y equipo', inputs.machinery],
                 ['Mobiliario e instalaciones', inputs.furniture],
                 ['Capital de trabajo', inputs.workingCapital]
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between gap-4">
-                  <dt className="text-slate-500">{label}</dt>
-                  <dd className="text-slate-800 table-number">{formatMoney(Number(value) || 0, currencySymbol)}</dd>
+                  <dt className="text-ink-2">{label}</dt>
+                  <dd className="text-ink table-number">{formatMoney(Number(value) || 0, currencySymbol)}</dd>
                 </div>
               ))}
-              <div className="flex justify-between gap-4 pt-2 mt-1 border-t border-slate-200 font-semibold">
-                <dt className="text-slate-900">Total (I₀)</dt>
-                <dd className="text-slate-900 table-number">{formatMoney(totalInvestment, currencySymbol)}</dd>
+              <div className="flex justify-between gap-4 pt-3 mt-1 border-t border-line font-semibold">
+                <dt className="text-ink">Total (I₀)</dt>
+                <dd className="text-ink table-number">{formatMoney(totalInvestment, currencySymbol)}</dd>
               </div>
             </dl>
           </Panel>
 
-          <Panel title="Validación de datos">
-            <ul className="space-y-3">
-              {validations.map((v, i) => {
-                const style = STATUS_STYLES[v.type === 'success' ? 'optimal' : v.type] || STATUS_STYLES.warning;
-                return (
-                  <li key={i} className="flex items-start gap-2.5 text-sm">
-                    <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${style.dot}`} aria-hidden="true" />
-                    <span className={v.type === 'success' ? 'text-slate-700' : style.text}>{v.message}</span>
-                  </li>
-                );
-              })}
+          <Panel
+            title="Validación de datos"
+            description={hasProblems ? 'Revise las observaciones antes de continuar.' : 'Los datos ingresados son consistentes.'}
+          >
+            <ul className="space-y-3" aria-live="polite">
+              {validations.map((v, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-sm">
+                  <StatusIcon status={v.type === 'success' ? 'optimal' : v.type} className="w-4 h-4 mt-0.5" />
+                  <span className={v.type === 'success' ? 'text-ink-2' : 'text-ink'}>{v.message}</span>
+                </li>
+              ))}
             </ul>
           </Panel>
         </div>
