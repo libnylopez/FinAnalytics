@@ -137,7 +137,9 @@ export default function App() {
           onOpenTeamModal={() => setIsTeamModalOpen(true)}
         />
 
-        <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-8 pt-6 pb-12 print:p-0 print:max-w-none">
+        <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-8 pt-2 pb-16 print:p-0 print:max-w-none">
+          {/* Cada módulo entra con un fundido breve; la clave reinicia la animación al cambiar de sección */}
+          <div key={activeTab} className="animate-rise-in print:animate-none">
           {activeTab === 'dashboard' && (
             <DashboardOverview
               inputs={inputs}
@@ -194,6 +196,7 @@ export default function App() {
               currencySymbol={currencySymbol}
             />
           )}
+          </div>
         </main>
       </div>
 

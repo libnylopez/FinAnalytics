@@ -2,12 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tipografías (SIL Open Font License 1.1), servidas desde el proyecto: sin peticiones externas */
+@font-face {
+  font-family: 'Geist';
+  src: url('./assets/fonts/geist-latin-var.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope';
+  src: url('./assets/fonts/manrope-latin-var.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 /*
  * Tokens de color (canales RGB para admitir opacidad en Tailwind).
  * Contraste medido (WCAG) sobre la superficie de cada modo:
- *   claro  — ink 16.8:1 · ink-2 6.0:1 · accent 5.5:1 · positive 6.1:1 · negative 6.4:1 · warning 6.1:1
- *   (sobre los fondos tintados de las cápsulas de estado se mantiene ≥ 4.5:1)
- *   oscuro — ink 14.7:1 · ink-2 6.4:1 · accent 6.3:1 · positive 7.7:1 · negative 5.9:1 · warning 8.1:1
+ *   claro  — ink 16.8:1 · ink-2 6.0:1 · accent 5.3:1 (4.6:1 sobre la selección) · positive 6.1:1
+ *            negative 6.4:1 · warning 6.1:1 (≥ 4.5:1 sobre los fondos tintados de estado)
+ *   oscuro — ink 14.9:1 · ink-2 6.5:1 · accent 5.2:1 (4.7:1 sobre la selección) · positive 6.2:1
+ *            negative 5.0:1 · warning 6.5:1 (medidos sobre los fondos tintados)
  * ink-3 se reserva para iconos y elementos no textuales (≥ 3:1).
  *
  * `.dark .paper` mantiene el documento del reporte en colores claros (papel).
@@ -17,72 +34,76 @@
 .dark .paper {
   color-scheme: light;
   --canvas: 245 245 247;
-  --sidebar: 255 255 255;
+  --sidebar: 250 250 251;
   --surface: 255 255 255;
-  --surface-2: 247 247 249;
+  --surface-2: 246 246 248;
   --field: 255 255 255;
   --segment: 255 255 255;
-  --line: 229 229 234;
-  --line-strong: 209 209 214;
+  --line: 233 233 238;
+  --line-strong: 209 209 216;
   --ink: 29 29 31;
   --ink-2: 99 99 102;
   --ink-3: 142 142 147;
-  --accent: 10 100 216;
-  --primary: 29 78 216;
+  --accent: 31 91 255;
+  --primary: 31 91 255;
   --positive: 21 112 64;
   --negative: 184 38 26;
   --warning: 147 82 0;
-  --chart-1: 42 120 214;
+  --chart-1: 31 91 255;
   --chart-2: 235 104 52;
   --rajil: 31 91 255;        /* #1F5BFF · 5.3:1 sobre blanco */
   --rajil-ink: 11 31 58;     /* #0B1F3A */
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 2px 8px rgb(0 0 0 / 0.03);
-  --shadow-pop: 0 12px 40px rgb(0 0 0 / 0.12), 0 2px 8px rgb(0 0 0 / 0.06);
-  --shadow-segment: 0 1px 2px rgb(0 0 0 / 0.08), 0 0 0 0.5px rgb(0 0 0 / 0.04);
+  --shadow-card: 0 0 0 0.5px rgb(16 24 40 / 0.02), 0 1px 2px rgb(16 24 40 / 0.04), 0 4px 16px -4px rgb(16 24 40 / 0.05);
+  --shadow-raised: 0 1px 2px rgb(16 24 40 / 0.06), 0 8px 24px -6px rgb(16 24 40 / 0.1);
+  --shadow-pop: 0 16px 48px -8px rgb(16 24 40 / 0.18), 0 2px 8px rgb(16 24 40 / 0.06);
+  --shadow-segment: 0 1px 2px rgb(16 24 40 / 0.1), 0 0 0 0.5px rgb(16 24 40 / 0.05);
 }
 
 @media screen {
   .dark {
     color-scheme: dark;
-    --canvas: 22 22 24;
-    --sidebar: 27 27 30;
-    --surface: 31 31 34;
-    --surface-2: 40 40 44;
-    --field: 26 26 29;
-    --segment: 84 84 88;
-    --line: 52 52 57;
-    --line-strong: 72 72 78;
+    --canvas: 20 20 22;
+    --sidebar: 24 24 27;
+    --surface: 30 30 33;
+    --surface-2: 38 38 42;
+    --field: 24 24 27;
+    --segment: 78 78 84;
+    --line: 46 46 51;
+    --line-strong: 70 70 77;
     --ink: 242 242 244;
     --ink-2: 161 161 168;
     --ink-3: 124 124 132;
-    --accent: 94 162 255;
-    --primary: 47 107 240;
+    --accent: 76 141 255;
+    --primary: 31 91 255;
     --positive: 63 201 122;
     --negative: 255 107 97;
     --warning: 245 165 36;
-    --chart-1: 57 135 229;
-    --chart-2: 217 89 38;
-    --rajil: 76 141 255;     /* #4C8DFF · 5.4:1 sobre la barra lateral oscura */
+    --chart-1: 76 141 255;
+    --chart-2: 224 112 58;
+    --rajil: 76 141 255;     /* #4C8DFF · 5.5:1 sobre la barra lateral oscura */
     --rajil-ink: 242 242 244;
-    --shadow-card: 0 0 0 0 transparent;
-    --shadow-pop: 0 16px 48px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.06);
-    --shadow-segment: 0 1px 2px rgb(0 0 0 / 0.3);
+    /* En oscuro la profundidad viene de un filo de luz superior, no de sombras */
+    --shadow-card: inset 0 1px 0 rgb(255 255 255 / 0.045), 0 1px 2px rgb(0 0 0 / 0.35);
+    --shadow-raised: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 8px 24px -6px rgb(0 0 0 / 0.5);
+    --shadow-pop: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 0 0 1px rgb(255 255 255 / 0.06), 0 20px 56px -8px rgb(0 0 0 / 0.6);
+    --shadow-segment: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 1px 2px rgb(0 0 0 / 0.4);
   }
 }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
   }
   body {
-    @apply bg-canvas text-ink font-sans antialiased;
-    font-feature-settings: 'kern';
+    @apply bg-canvas text-ink font-sans antialiased text-body;
+    font-feature-settings: 'kern', 'calt';
   }
   /* Foco visible y consistente para navegación con teclado */
   :focus-visible {
     outline: 2px solid rgb(var(--accent));
     outline-offset: 2px;
-    border-radius: 6px;
+    border-radius: 8px;
   }
   input:focus-visible,
   select:focus-visible,
@@ -100,13 +121,14 @@
 @layer components {
   /* Campo de texto o numérico */
   .field-input {
-    @apply h-10 w-full rounded-control border border-line-strong bg-field px-3 text-sm text-ink
-      transition-[border-color,box-shadow] duration-150 ease-out
+    @apply h-11 w-full rounded-control border border-line-strong bg-field px-3.5 text-body text-ink
+      transition-[border-color,box-shadow,background-color] duration-180 ease-out
       hover:border-ink-3
-      focus:outline-none focus:border-accent focus:ring-4 focus:ring-accent/15;
+      focus:outline-none focus:border-accent focus:shadow-focus;
   }
   .field-input[aria-invalid='true'] {
-    @apply border-negative focus:border-negative focus:ring-negative/15;
+    @apply border-negative focus:border-negative;
+    box-shadow: 0 0 0 4px rgb(var(--negative) / 0.12);
   }
 }
 
@@ -131,13 +153,21 @@ input[type='number'] {
   scrollbar-color: rgb(var(--line-strong)) transparent;
 }
 
+/* Barra superior translúcida: sin transparencia si el sistema la reduce */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-bar {
+    backdrop-filter: none !important;
+    background-color: rgb(var(--canvas)) !important;
+  }
+}
+
 /* Transición suave al cambiar de tema (la clase se aplica solo durante el cambio) */
 html.theme-transition,
 html.theme-transition *,
 html.theme-transition *::before,
 html.theme-transition *::after {
-  transition: background-color 220ms ease, border-color 220ms ease, color 220ms ease,
-    fill 220ms ease, stroke 220ms ease !important;
+  transition: background-color 240ms ease, border-color 240ms ease, color 240ms ease,
+    fill 240ms ease, stroke 240ms ease, box-shadow 240ms ease !important;
 }
 
 /* Respeta la preferencia de movimiento reducido */
