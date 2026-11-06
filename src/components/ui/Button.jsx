@@ -1,9 +1,7 @@
 import React from 'react';
 
 const VARIANTS = {
-  primary:
-    'bg-primary text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.16),0_1px_2px_rgb(16_24_40/0.14)] ' +
-    'hover:brightness-[1.08] active:brightness-95',
+  primary: 'bg-brand-gradient shadow-brand text-white hover:brightness-[1.08] active:brightness-95',
   secondary:
     'bg-surface text-ink border border-line-strong shadow-[0_1px_2px_rgb(16_24_40/0.05)] hover:bg-surface-2 hover:border-ink-3/60',
   plain: 'text-accent hover:text-accent/75'

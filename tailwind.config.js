@@ -93,6 +93,8 @@ export default {
         // Curvas de movimiento: salida suave (entradas, hover) y énfasis (desplazamientos)
         out: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
         emphasis: 'cubic-bezier(0.32, 0.72, 0, 1)',
+        // Rebote mínimo para el indicador de navegación (se anula con movimiento reducido)
+        spring: 'cubic-bezier(0.34, 1.25, 0.64, 1)',
       },
       transitionDuration: {
         120: '120ms',

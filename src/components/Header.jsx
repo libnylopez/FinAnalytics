@@ -31,14 +31,14 @@ export default function Header({ title, companyData, currency, setCurrency, them
 
   return (
     <header
-      className={`glass-bar relative lg:sticky lg:top-0 z-20 px-4 sm:px-8 pt-6 pb-4 lg:pt-7 lg:pb-5 print:hidden
+      className={`glass-bar relative lg:sticky lg:top-0 z-20 pt-6 pb-4 lg:pt-7 lg:pb-5 print:hidden
         border-b transition-[border-color,box-shadow,background-color] duration-240 ${
           scrolled
             ? 'border-line lg:bg-canvas/80 lg:backdrop-blur-xl lg:backdrop-saturate-150 lg:shadow-[0_1px_12px_-6px_rgb(16_24_40/0.12)]'
             : 'border-transparent'
         }`}
     >
-      <div className="relative max-w-6xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="min-w-0">
           <h1 key={title} className="font-display text-[26px] leading-8 sm:text-title font-bold text-ink animate-fade-in">
             {title}

@@ -113,7 +113,7 @@ export default function DashboardOverview({
           return (
             <div key={kpi.label} className="bg-surface border border-line rounded-card shadow-card px-5 pt-5 pb-5">
               <dt className="flex items-center gap-2.5 text-footnote font-medium text-ink-2">
-                <span className="w-8 h-8 rounded-[10px] bg-accent/[0.08] text-accent grid place-items-center shrink-0">
+                <span className="w-8 h-8 rounded-[10px] bg-gradient-to-br from-accent/[0.16] to-accent/[0.05] ring-1 ring-inset ring-accent/10 text-accent grid place-items-center shrink-0">
                   <Icon className="w-4 h-4" strokeWidth={2.1} aria-hidden="true" />
                 </span>
                 {kpi.label}

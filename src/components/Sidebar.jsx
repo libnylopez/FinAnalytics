@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { RajilMark, RajilWordmark } from './brand/RajilLogo';
 import useIndicator from '../hooks/useIndicator';
-import AtitlanLandscape from './brand/AtitlanLandscape';
 
 export const MENU_ITEMS = [
   { id: 'dashboard', label: 'Resumen', icon: LayoutDashboard },
@@ -23,7 +22,7 @@ export const MENU_ITEMS = [
 
 const itemBase =
   'group relative z-[1] flex items-center gap-3 h-10 px-3 rounded-[10px] text-callout whitespace-nowrap text-left cursor-pointer ' +
-  'transition-colors duration-180 ease-out';
+  'transition-[color,background-color,transform] duration-180 ease-out active:scale-[0.97]';
 
 export default function Sidebar({ activeTab, setActiveTab, onOpenTeamModal }) {
   const navRef = useRef(null);
@@ -33,8 +32,9 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenTeamModal }) {
   return (
     <aside className="bg-sidebar border-b lg:border-b-0 lg:border-r border-line flex flex-col shrink-0 lg:w-[264px] lg:h-screen lg:sticky lg:top-0 print:hidden">
       {/* Identidad */}
-      <div className="flex items-center gap-3 px-5 pt-5 pb-3 lg:px-6 lg:pt-7 lg:pb-7">
-        <RajilMark size={36} />
+      {/* El isotipo comparte eje con los iconos del menú y el nombre con sus etiquetas */}
+      <div className="flex items-center gap-[6px] pl-[18px] lg:pl-[22px] pr-5 pt-5 pb-3 lg:pt-7 lg:pb-7">
+        <RajilMark size={30} />
         <div className="min-w-0">
           <div className="pb-1.5">
             <RajilWordmark capHeight={13} />
@@ -52,7 +52,7 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenTeamModal }) {
       >
         <span
           aria-hidden="true"
-          className="absolute left-0 top-0 rounded-[10px] bg-accent/[0.09] ring-1 ring-inset ring-accent/[0.08] duration-240 ease-emphasis"
+          className="absolute left-0 top-0 rounded-[10px] bg-brand-gradient shadow-brand duration-[320ms] ease-spring"
           style={indicator}
         />
         {MENU_ITEMS.map((item) => {
@@ -64,13 +64,14 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenTeamModal }) {
               type="button"
               onClick={() => setActiveTab(item.id)}
               aria-current={isActive ? 'page' : undefined}
+              data-on-brand={isActive || undefined}
               className={`${itemBase} ${
-                isActive ? 'text-accent font-semibold' : 'text-ink-2 font-medium hover:bg-ink/[0.045] hover:text-ink'
+                isActive ? 'text-white font-semibold' : 'text-ink-2 font-medium hover:bg-ink/[0.045] hover:text-ink'
               }`}
             >
               <Icon
-                className={`w-[18px] h-[18px] shrink-0 transition-colors duration-180 ${
-                  isActive ? 'text-accent' : 'text-ink-3 group-hover:text-ink-2'
+                className={`w-[18px] h-[18px] shrink-0 transition-[color,transform] duration-180 ease-out ${
+                  isActive ? 'text-white' : 'text-ink-3 group-hover:text-ink-2 group-hover:translate-x-[1px]'
                 }`}
                 strokeWidth={isActive ? 2.2 : 1.9}
               />
@@ -79,17 +80,6 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenTeamModal }) {
           );
         })}
       </nav>
-
-      {/* Origen del proyecto: UVG Campus Sololá, con el Lago de Atitlán simplificado */}
-      <div className="hidden lg:block px-4 pb-3">
-        <div className="relative h-[92px] rounded-[14px] border border-line bg-gradient-to-b from-surface to-surface-2 overflow-hidden">
-          <AtitlanLandscape layers="premium" fade="none" className="absolute inset-x-0 bottom-0 w-full h-[72px]" />
-          <div className="relative px-3.5 pt-3">
-            <div className="text-footnote font-semibold text-ink">UVG</div>
-            <div className="text-caption text-ink-2">Campus Sololá</div>
-          </div>
-        </div>
-      </div>
 
       {/* Información del proyecto */}
       <div className="hidden lg:block px-4 py-4 border-t border-line">

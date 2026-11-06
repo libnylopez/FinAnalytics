@@ -24,12 +24,15 @@ export default function AtitlanLandscape({ className = '', layers = 'premium', f
     >
       <defs>
         <linearGradient id={`water-${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="rgb(var(--lake))" stopOpacity={minimal ? 0.05 : 0.11} />
+          <stop offset="0" stopColor="rgb(var(--lake))" stopOpacity={minimal ? 0.04 : 0.07} />
           <stop offset="1" stopColor="rgb(var(--lake))" stopOpacity="0" />
         </linearGradient>
-        <linearGradient id={`fade-${id}`} x1={fade === 'left' ? '0' : '1'} y1="0" x2={fade === 'left' ? '1' : '0'} y2="0">
+        {/* Desvanecido horizontal: el paisaje nunca termina en un borde duro */}
+        <linearGradient id={`fade-${id}`} x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stopColor="#fff" stopOpacity="0" />
-          <stop offset="0.35" stopColor="#fff" stopOpacity="1" />
+          <stop offset="0.3" stopColor="#fff" stopOpacity="1" />
+          <stop offset={fade === 'both' ? '0.72' : '1'} stopColor="#fff" stopOpacity="1" />
+          <stop offset="1" stopColor="#fff" stopOpacity={fade === 'both' ? '0' : '1'} />
         </linearGradient>
         <mask id={`mask-${id}`}>
           <rect width={width} height={height} fill={fade === 'none' ? '#fff' : `url(#fade-${id})`} />
@@ -37,7 +40,7 @@ export default function AtitlanLandscape({ className = '', layers = 'premium', f
       </defs>
 
       <g mask={`url(#mask-${id})`}>
-        {!minimal && <path d={LAKE_PATHS.far} fill="rgb(var(--lake))" fillOpacity="0.07" />}
+        {!minimal && <path d={LAKE_PATHS.far} fill="rgb(var(--lake))" fillOpacity="0.06" />}
         <path d={LAKE_PATHS.main} fill="rgb(var(--lake))" fillOpacity={minimal ? 0.1 : 0.12} />
         {!minimal && (
           <>
@@ -47,7 +50,7 @@ export default function AtitlanLandscape({ className = '', layers = 'premium', f
         )}
         {/* Lago */}
         <rect x="0" y={water} width={width} height={height - water} fill={`url(#water-${id})`} />
-        <line x1="0" x2={width} y1={water + 0.5} y2={water + 0.5} stroke="rgb(var(--lake))" strokeOpacity={minimal ? 0.18 : 0.22} strokeWidth="1.5" />
+        <line x1="0" x2={width} y1={water + 0.5} y2={water + 0.5} stroke="rgb(var(--lake))" strokeOpacity={minimal ? 0.12 : 0.16} strokeWidth="1" />
         {!minimal && (
           <g stroke="rgb(var(--lake))" strokeLinecap="round" strokeWidth="2">
             {/* Reflejo del volcán sobre el agua, sin movimiento */}

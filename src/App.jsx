@@ -130,11 +130,16 @@ export default function App() {
       <div className="relative flex-1 flex flex-col min-w-0">
         {/* Lago de Atitlán: identidad discreta detrás del encabezado del Resumen (estático, decorativo) */}
         {activeTab === 'dashboard' && (
-          <AtitlanLandscape
-            layers="premium"
-            fit="meet"
-            className="hidden md:block absolute top-0 right-0 w-[min(1120px,92%)] h-[182px] animate-fade-in print:hidden"
-          />
+          <div className="hidden md:block absolute inset-x-0 top-0 h-[190px] pointer-events-none print:hidden" aria-hidden="true">
+            <div className="relative h-full max-w-6xl mx-auto">
+              <AtitlanLandscape
+                layers="premium"
+                fit="meet"
+                fade="both"
+                className="absolute top-0 right-0 h-full w-[min(1100px,100%)] animate-fade-in"
+              />
+            </div>
+          </div>
         )}
         <Header
           title={activeTitle}
