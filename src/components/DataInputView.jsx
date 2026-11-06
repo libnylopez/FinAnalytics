@@ -4,6 +4,7 @@ import Panel from './ui/Panel';
 import Button from './ui/Button';
 import Disclosure from './ui/Disclosure';
 import { StatusIcon } from './ui/StatusLabel';
+import ActionFeedback, { useActionFeedback } from './ui/ActionFeedback';
 import { formatMoney, formatNumber } from '../utils/format';
 
 const SECTORS = ['Manufactura', 'Comercio', 'Servicios'];
@@ -12,11 +13,11 @@ const SECTORS = ['Manufactura', 'Comercio', 'Servicios'];
 function Field({ label, htmlFor, hint, children }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="block text-[13px] font-medium text-ink mb-1.5">
+      <label htmlFor={htmlFor} className="block text-callout font-medium text-ink mb-2">
         {label}
       </label>
       {children}
-      {hint && <p className="text-xs text-ink-2 mt-1.5 min-h-[1rem]">{hint}</p>}
+      {hint && <p className="text-footnote text-ink-2 mt-1.5 min-h-[18px]">{hint}</p>}
     </div>
   );
 }
@@ -38,7 +39,7 @@ function NumberInput({ id, value, onChange, prefix, suffix, step = 'any', min, i
   return (
     <div className="relative">
       {prefix && (
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink-2 pointer-events-none">{prefix}</span>
+        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-body text-ink-2 pointer-events-none">{prefix}</span>
       )}
       <input
         id={id}
@@ -50,10 +51,10 @@ function NumberInput({ id, value, onChange, prefix, suffix, step = 'any', min, i
         aria-invalid={invalid || undefined}
         onChange={(e) => onChange(e.target.value)}
         onFocus={(e) => e.target.select()}
-        className={`field-input text-right table-number ${prefix ? 'pl-8' : ''} ${suffix ? 'pr-8' : ''}`}
+        className={`field-input text-right table-number ${prefix ? 'pl-9' : ''} ${suffix ? 'pr-9' : ''}`}
       />
       {suffix && (
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-ink-2 pointer-events-none">{suffix}</span>
+        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-body text-ink-2 pointer-events-none">{suffix}</span>
       )}
     </div>
   );
@@ -72,6 +73,8 @@ export default function DataInputView({
   const [unitPrice, setUnitPrice] = useState(106.67);
   const [monthlyUnitsY1, setMonthlyUnitsY1] = useState(250);
   const [growthRate, setGrowthRate] = useState(17);
+  const toolbarFeedback = useActionFeedback();
+  const assistantFeedback = useActionFeedback();
 
   const totalInvestment =
     (Number(inputs.machinery) || 0) + (Number(inputs.furniture) || 0) + (Number(inputs.workingCapital) || 0);
@@ -110,6 +113,7 @@ export default function DataInputView({
       salesY4: y4,
       salesY5: y5
     }));
+    assistantFeedback.show('Proyección aplicada a los 5 años');
   };
 
   const salesKeys = ['salesY1', 'salesY2', 'salesY3', 'salesY4', 'salesY5'];
@@ -117,14 +121,24 @@ export default function DataInputView({
   const hasProblems = validations.some((v) => v.type !== 'success');
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Barra de acciones */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <label htmlFor="preset" className="text-[13px] text-ink-2">
-            Cargar datos de ejemplo
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface border border-line rounded-card shadow-card px-5 py-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <label htmlFor="preset" className="text-callout font-medium text-ink">
+            Datos de ejemplo
           </label>
-          <Select id="preset" value="" onChange={(e) => e.target.value && onSectorPreset(e.target.value)} className="w-48">
+          <Select
+            id="preset"
+            value=""
+            onChange={(e) => {
+              const sector = e.target.value;
+              if (!sector) return;
+              onSectorPreset(sector);
+              toolbarFeedback.show(`Ejemplo de ${sector} cargado`);
+            }}
+            className="w-52"
+          >
             <option value="">Seleccionar sector…</option>
             {SECTORS.map((sec) => (
               <option key={sec} value={sec}>
@@ -132,17 +146,25 @@ export default function DataInputView({
               </option>
             ))}
           </Select>
-          <span className="text-xs text-ink-2">Datos simulados con fines académicos.</span>
+          <span className="text-footnote text-ink-2">Datos simulados con fines académicos.</span>
         </div>
-        <Button onClick={onResetDefaults}>
-          <RotateCcw className="w-4 h-4" />
-          Restablecer valores iniciales
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <ActionFeedback {...toolbarFeedback} />
+          <Button
+            onClick={() => {
+              onResetDefaults();
+              toolbarFeedback.show('Valores iniciales restablecidos');
+            }}
+          >
+            <RotateCcw className="w-4 h-4" />
+            Restablecer valores iniciales
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Formulario */}
-        <div className="lg:col-span-2 space-y-5">
+        <div className="lg:col-span-2 space-y-6">
           <Panel title="Información de la empresa">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
               <Field label="Nombre o razón social" htmlFor="companyName">
@@ -203,8 +225,8 @@ export default function DataInputView({
             description="Ventas anuales estimadas para los 5 años del horizonte."
             actions={
               <div className="text-right">
-                <div className="text-xs text-ink-2">Total 5 años</div>
-                <div className="text-sm font-semibold text-ink table-number">{formatMoney(totalSales, currencySymbol)}</div>
+                <div className="text-footnote text-ink-2">Total 5 años</div>
+                <div className="font-display text-headline font-bold text-ink table-number">{formatMoney(totalSales, currencySymbol)}</div>
               </div>
             }
           >
@@ -233,7 +255,7 @@ export default function DataInputView({
                 onClick={() => setShowAssistant(!showAssistant)}
                 aria-expanded={showAssistant}
                 aria-controls="sales-assistant"
-                className="flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent/80 cursor-pointer transition-colors duration-150 rounded"
+                className="flex items-center gap-1.5 text-callout font-medium text-accent hover:text-accent/75 cursor-pointer transition-colors duration-150 rounded-md"
               >
                 <ChevronRight
                   className={`w-4 h-4 transition-transform duration-200 ease-out ${showAssistant ? 'rotate-90' : ''}`}
@@ -243,7 +265,7 @@ export default function DataInputView({
               </button>
 
               <Disclosure open={showAssistant} id="sales-assistant">
-                <div className="mt-4 rounded-xl bg-surface-2 border border-line p-4 space-y-4">
+                <div className="mt-4 rounded-[14px] bg-surface-2 border border-line p-5 space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <Field label="Precio promedio por unidad" htmlFor="unitPrice">
                       <NumberInput id="unitPrice" prefix={currencySymbol} step="0.01" min="0" value={unitPrice} onChange={setUnitPrice} />
@@ -257,7 +279,7 @@ export default function DataInputView({
                     </Field>
                     <Field label="Crecimiento anual" htmlFor="growthRate">
                       <NumberInput id="growthRate" suffix="%" step="1" value={growthRate} onChange={setGrowthRate} />
-                      <div className="mt-2 flex items-center gap-1.5 text-xs">
+                      <div className="mt-2 flex items-center gap-1.5 text-footnote">
                         <span className="text-ink-2 mr-0.5">Aplicar</span>
                         {[10, 15, 20].map((rate) => (
                           <button
@@ -267,7 +289,7 @@ export default function DataInputView({
                               setGrowthRate(rate);
                               handleAutoProjectSales(unitPrice, monthlyUnitsY1, rate);
                             }}
-                            className="h-6 px-2 rounded-md border border-line-strong bg-surface text-ink hover:bg-surface-2 cursor-pointer transition-colors duration-150 table-number"
+                            className="h-7 px-2.5 rounded-lg border border-line-strong bg-surface text-ink font-medium hover:bg-surface-2 hover:border-ink-3/60 active:scale-[0.96] cursor-pointer transition-[background-color,border-color,transform] duration-150 table-number"
                           >
                             {rate}%
                           </button>
@@ -276,13 +298,16 @@ export default function DataInputView({
                     </Field>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <p className="text-xs text-ink-2">
+                    <p className="text-footnote text-ink-2">
                       Año 1 = unidades × 12 × precio. Cada año siguiente = año anterior × (1 + crecimiento).
                     </p>
-                    <Button variant="primary" onClick={() => handleAutoProjectSales()}>
-                      <Calculator className="w-4 h-4" />
-                      Calcular proyección
-                    </Button>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <ActionFeedback {...assistantFeedback} />
+                      <Button variant="primary" onClick={() => handleAutoProjectSales()}>
+                        <Calculator className="w-4 h-4" />
+                        Calcular proyección
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </Disclosure>
@@ -303,7 +328,7 @@ export default function DataInputView({
             </div>
           </Panel>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Panel title="Financiamiento">
               <div className="grid grid-cols-1 gap-4">
                 <Field label="Préstamo bancario" htmlFor="bankDebt" hint="Se amortiza 20% por año">
@@ -336,9 +361,9 @@ export default function DataInputView({
         </div>
 
         {/* Columna lateral: resumen y validación */}
-        <div className="space-y-5 lg:sticky lg:top-6">
+        <div className="space-y-6 lg:sticky lg:top-[136px]">
           <Panel title="Inversión inicial">
-            <dl className="space-y-2.5 text-sm">
+            <dl className="space-y-3 text-callout">
               {[
                 ['Maquinaria y equipo', inputs.machinery],
                 ['Mobiliario e instalaciones', inputs.furniture],
@@ -349,9 +374,9 @@ export default function DataInputView({
                   <dd className="text-ink table-number">{formatMoney(Number(value) || 0, currencySymbol)}</dd>
                 </div>
               ))}
-              <div className="flex justify-between gap-4 pt-3 mt-1 border-t border-line font-semibold">
-                <dt className="text-ink">Total (I₀)</dt>
-                <dd className="text-ink table-number">{formatMoney(totalInvestment, currencySymbol)}</dd>
+              <div className="flex items-baseline justify-between gap-4 pt-4 mt-1 border-t border-line">
+                <dt className="font-semibold text-ink">Total</dt>
+                <dd className="font-display text-figure-sm font-bold text-ink table-number">{formatMoney(totalInvestment, currencySymbol)}</dd>
               </div>
             </dl>
           </Panel>
@@ -362,7 +387,7 @@ export default function DataInputView({
           >
             <ul className="space-y-3" aria-live="polite">
               {validations.map((v, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm">
+                <li key={v.message} className="flex items-start gap-2.5 text-callout animate-rise-in">
                   <StatusIcon status={v.type === 'success' ? 'optimal' : v.type} className="w-4 h-4 mt-0.5" />
                   <span className={v.type === 'success' ? 'text-ink-2' : 'text-ink'}>{v.message}</span>
                 </li>

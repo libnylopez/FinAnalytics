@@ -1,18 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { formatMoney } from '../utils/format';
+import { formatMoney, formatPayback } from '../utils/format';
 
 /**
  * Perfil de la inversión: flujo de caja libre de cada año (columnas) y flujo acumulado (línea).
  * Ambas series comparten la misma escala monetaria (un solo eje). El punto donde el acumulado
  * cruza cero es el período de recuperación que calcula el motor.
- * Solo presenta datos ya calculados; no realiza cálculos financieros.
+ *
+ * Solo presenta datos ya calculados. Cuando los datos cambian, la geometría se interpola
+ * durante 240 ms; las cifras del tooltip y de las etiquetas siempre son los valores reales.
  */
 
-const HEIGHT = 232;
-const PAD = { top: 16, right: 12, bottom: 30, left: 64 };
+const HEIGHT = 248;
+const PAD = { top: 26, right: 16, bottom: 32, left: 68 };
 const BAR_MAX = 24;
 const RADIUS = 4;
-const TOOLTIP_W = 212;
+const TOOLTIP_W = 220;
+const TWEEN_MS = 240;
 
 function niceStep(range, targetTicks = 4) {
   const raw = range / targetTicks;
@@ -37,10 +40,8 @@ function barPath(x, w, yBase, yValue) {
   if (h < 0.5) return '';
   const r = Math.min(RADIUS, h, w / 2);
   if (yValue < yBase) {
-    // positiva: crece hacia arriba
     return `M${x},${yBase} V${yValue + r} Q${x},${yValue} ${x + r},${yValue} H${x + w - r} Q${x + w},${yValue} ${x + w},${yValue + r} V${yBase} Z`;
   }
-  // negativa: crece hacia abajo
   return `M${x},${yBase} V${yValue - r} Q${x},${yValue} ${x + r},${yValue} H${x + w - r} Q${x + w},${yValue} ${x + w},${yValue - r} V${yBase} Z`;
 }
 
@@ -56,10 +57,44 @@ function useWidth() {
   return [ref, width];
 }
 
+/** Interpola un arreglo numérico hacia su nuevo valor (solo para dibujar). */
+function useTweened(values) {
+  const [shown, setShown] = useState(values);
+  const fromRef = useRef(values);
+  const key = values.join('|');
+  useEffect(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const from = fromRef.current;
+    if (reduce || from.length !== values.length) {
+      fromRef.current = values;
+      setShown(values);
+      return undefined;
+    }
+    let raf;
+    const start = performance.now();
+    const ease = (t) => 1 - (1 - t) ** 3;
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / TWEEN_MS);
+      const k = ease(t);
+      const next = values.map((v, i) => from[i] + (v - from[i]) * k);
+      fromRef.current = next;
+      setShown(next);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  return shown;
+}
+
 export default function CashFlowChart({ years, annual, cumulative, paybackYears, paybackRecovered, symbol }) {
   const [ref, width] = useWidth();
   const [hover, setHover] = useState(null);
+  const shownAnnual = useTweened(annual);
+  const shownCumulative = useTweened(cumulative);
 
+  // La escala se calcula con los valores reales para que los ejes no oscilen
   const all = [...annual, ...cumulative, 0];
   const rawMin = Math.min(...all);
   const rawMax = Math.max(...all);
@@ -69,25 +104,51 @@ export default function CashFlowChart({ years, annual, cumulative, paybackYears,
   const ticks = [];
   for (let v = yMin; v <= yMax + step / 2; v += step) ticks.push(v);
 
+  const compact = width < 520;
   const plotW = Math.max(width - PAD.left - PAD.right, 0);
   const plotH = HEIGHT - PAD.top - PAD.bottom;
   const band = plotW / years.length;
-  const barW = Math.min(BAR_MAX, band * 0.42);
+  const barW = Math.min(BAR_MAX, band * 0.4);
   const y = (v) => PAD.top + ((yMax - v) / (yMax - yMin || 1)) * plotH;
   const cx = (i) => PAD.left + band * i + band / 2;
 
-  const linePoints = cumulative.map((v, i) => `${cx(i)},${y(v)}`).join(' ');
+  const linePoints = shownCumulative.map((v, i) => `${cx(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const last = cumulative.length - 1;
 
-  // Marca de recuperación: entre el centro del año entero y el siguiente
   const showPayback = paybackRecovered && paybackYears > 0 && paybackYears <= years.length - 1;
   const paybackX = showPayback ? cx(0) + band * paybackYears : 0;
+  const paybackLabel = `Recupera en ${formatPayback(paybackYears, true)}`;
+  // La etiqueta se coloca del lado donde cabe; si no cabe en ninguno se omite
+  // (la descripción de la tarjeta ya indica el período de recuperación).
+  const LABEL_W = 132;
+  const fitsRight = paybackX + 8 + LABEL_W <= width - PAD.right;
+  const fitsLeft = paybackX - 8 - LABEL_W >= PAD.left;
+  const labelRight = !fitsRight && fitsLeft;
+  const showPaybackLabel = fitsRight || fitsLeft;
 
   const summary = years
     .map((yr, i) => `${yr}: flujo ${formatMoney(annual[i], symbol)}, acumulado ${formatMoney(cumulative[i], symbol)}`)
     .join('; ');
 
+  const onKeyDown = (e) => {
+    if (e.key === 'ArrowRight') setHover((h) => (h === null ? 0 : Math.min(years.length - 1, h + 1)));
+    else if (e.key === 'ArrowLeft') setHover((h) => (h === null ? 0 : Math.max(0, h - 1)));
+    else if (e.key === 'Escape') setHover(null);
+    else return;
+    e.preventDefault();
+  };
+
   return (
-    <div ref={ref} className="relative w-full select-none" onMouseLeave={() => setHover(null)}>
+    <div
+      ref={ref}
+      className="relative w-full select-none rounded-xl outline-offset-4"
+      onMouseLeave={() => setHover(null)}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
+      onFocus={() => setHover((h) => (h === null ? 0 : h))}
+      onBlur={() => setHover(null)}
+      aria-label="Gráfica de flujo de caja. Use las flechas izquierda y derecha para recorrer los años."
+    >
       {width > 0 && (
         <svg width={width} height={HEIGHT} role="img" aria-label={`Flujo de caja libre por año. ${summary}`} className="block">
           {/* Cuadrícula y eje */}
@@ -98,81 +159,92 @@ export default function CashFlowChart({ years, annual, cumulative, paybackYears,
                 x2={width - PAD.right}
                 y1={y(t)}
                 y2={y(t)}
-                stroke={t === 0 ? 'rgb(var(--line-strong))' : 'rgb(var(--line))'}
+                stroke={t === 0 ? 'rgb(var(--ink-3))' : 'rgb(var(--line))'}
+                strokeOpacity={t === 0 ? 0.7 : 1}
                 strokeWidth="1"
                 shapeRendering="crispEdges"
               />
-              <text
-                x={PAD.left - 10}
-                y={y(t)}
-                dy="0.32em"
-                textAnchor="end"
-                className="fill-ink-2 text-[11px] table-number"
-              >
+              <text x={PAD.left - 12} y={y(t)} dy="0.32em" textAnchor="end" className="fill-ink-2 text-caption table-number">
                 {compactMoney(t, symbol)}
               </text>
             </g>
           ))}
 
-          {/* Columna resaltada al pasar el cursor */}
+          {/* Columna resaltada y guía vertical al recorrer la gráfica */}
           {hover !== null && (
-            <rect x={PAD.left + band * hover} y={PAD.top} width={band} height={plotH} rx="6" fill="rgb(var(--ink) / 0.04)" />
+            <g className="animate-fade-in">
+              <rect x={PAD.left + band * hover + 4} y={PAD.top - 8} width={band - 8} height={plotH + 8} rx="8" fill="rgb(var(--ink) / 0.045)" />
+            </g>
           )}
 
           {/* Marca del período de recuperación */}
           {showPayback && (
             <g>
-              <line x1={paybackX} x2={paybackX} y1={PAD.top} y2={y(0)} stroke="rgb(var(--ink-3))" strokeWidth="1" shapeRendering="crispEdges" />
-              <text
-                x={paybackX + (paybackX > width - 150 ? -6 : 6)}
-                y={PAD.top + 4}
-                dy="0.7em"
-                textAnchor={paybackX > width - 150 ? 'end' : 'start'}
-                className="fill-ink-2 text-[11px] font-medium"
+              <line x1={paybackX} x2={paybackX} y1={PAD.top - 6} y2={y(0)} stroke="rgb(var(--ink-3))" strokeWidth="1" strokeOpacity="0.8" shapeRendering="crispEdges" />
+              <circle cx={paybackX} cy={y(0)} r="3" fill="rgb(var(--ink))" />
+              {showPaybackLabel && <text
+                x={paybackX + (labelRight ? -8 : 8)}
+                y={PAD.top - 6}
+                dy="0.75em"
+                textAnchor={labelRight ? 'end' : 'start'}
+                className="fill-ink text-caption font-medium"
               >
-                Recuperación
-              </text>
+                {paybackLabel}
+              </text>}
             </g>
           )}
 
           {/* Flujo anual */}
-          {annual.map((v, i) => (
-            <path key={years[i]} d={barPath(cx(i) - barW / 2, barW, y(0), y(v))} fill="rgb(var(--chart-1))" />
+          {shownAnnual.map((v, i) => (
+            <path
+              key={years[i]}
+              d={barPath(cx(i) - barW / 2, barW, y(0), y(v))}
+              fill="rgb(var(--chart-1))"
+              fillOpacity={hover === null || hover === i ? 1 : 0.55}
+              className="transition-[fill-opacity] duration-180"
+            />
           ))}
 
           {/* Flujo acumulado */}
           <polyline points={linePoints} fill="none" stroke="rgb(var(--chart-2))" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-          {cumulative.map((v, i) => (
+          {shownCumulative.map((v, i) => (
             <circle
               key={years[i]}
               cx={cx(i)}
               cy={y(v)}
-              r={hover === i ? 5 : 4}
+              r={hover === i ? 5.5 : 4}
               fill="rgb(var(--chart-2))"
               stroke="rgb(var(--surface))"
               strokeWidth="2"
-              className="transition-[r] duration-150"
+              className="transition-[r] duration-180 ease-out"
             />
           ))}
 
+          {/* Etiqueta directa selectiva: valor final del acumulado */}
+          {!compact && (
+            <>
+              <text x={cx(last)} y={y(cumulative[last]) - 12} textAnchor="middle" className="fill-ink text-caption font-semibold table-number">
+                {compactMoney(cumulative[last], symbol)}
+              </text>
+            </>
+          )}
+
           {/* Etiquetas de año */}
           {years.map((yr, i) => (
-            <text key={yr} x={cx(i)} y={HEIGHT - 8} textAnchor="middle" className={`text-[11px] ${hover === i ? 'fill-ink font-medium' : 'fill-ink-2'}`}>
-              {yr}
+            <text
+              key={yr}
+              x={cx(i)}
+              y={HEIGHT - 8}
+              textAnchor="middle"
+              className={`text-caption transition-colors duration-150 ${hover === i ? 'fill-ink font-semibold' : 'fill-ink-2'}`}
+            >
+              {compact ? yr.replace('Año ', 'A') : yr}
             </text>
           ))}
 
           {/* Zonas de interacción (más amplias que las marcas) */}
           {years.map((yr, i) => (
-            <rect
-              key={yr}
-              x={PAD.left + band * i}
-              y={PAD.top}
-              width={band}
-              height={plotH}
-              fill="transparent"
-              onMouseEnter={() => setHover(i)}
-            />
+            <rect key={yr} x={PAD.left + band * i} y={0} width={band} height={HEIGHT} fill="transparent" onMouseEnter={() => setHover(i)} />
           ))}
         </svg>
       )}
@@ -180,24 +252,28 @@ export default function CashFlowChart({ years, annual, cumulative, paybackYears,
       {/* Tooltip */}
       {hover !== null && width > 0 && (
         <div
-          className="pointer-events-none absolute z-10 w-[212px] rounded-lg border border-line bg-surface shadow-pop px-3 py-2 text-xs animate-fade-in"
+          key={hover}
+          className="pointer-events-none absolute z-10 rounded-xl border border-line bg-surface/95 backdrop-blur-md shadow-pop px-3.5 py-2.5 text-footnote animate-fade-in"
           style={{
-            top: PAD.top,
-            left: Math.min(Math.max(cx(hover) + (hover >= years.length - 2 ? -(TOOLTIP_W + 16) : 16), 0), width - TOOLTIP_W)
+            width: TOOLTIP_W,
+            top: PAD.top - 4,
+            left: Math.min(Math.max(cx(hover) + (hover >= years.length - 2 ? -(TOOLTIP_W + 18) : 18), 0), width - TOOLTIP_W)
           }}
         >
-          <div className="font-semibold text-ink mb-1">{years[hover]}</div>
+          <div className="font-semibold text-ink mb-1.5">{years[hover]}</div>
           <div className="flex items-center justify-between gap-4 text-ink-2">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-sm bg-chart-1" aria-hidden="true" /> Flujo del año
+            <span className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-[3px] bg-chart-1" aria-hidden="true" /> Flujo del año
             </span>
-            <span className="text-ink table-number font-medium">{formatMoney(annual[hover], symbol)}</span>
+            <span className={`table-number font-medium ${annual[hover] < 0 ? 'text-negative' : 'text-ink'}`}>{formatMoney(annual[hover], symbol)}</span>
           </div>
-          <div className="flex items-center justify-between gap-4 text-ink-2 mt-0.5">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-chart-2" aria-hidden="true" /> Acumulado
+          <div className="flex items-center justify-between gap-4 text-ink-2 mt-1">
+            <span className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-chart-2" aria-hidden="true" /> Acumulado
             </span>
-            <span className="text-ink table-number font-medium">{formatMoney(cumulative[hover], symbol)}</span>
+            <span className={`table-number font-medium ${cumulative[hover] < 0 ? 'text-negative' : 'text-ink'}`}>
+              {formatMoney(cumulative[hover], symbol)}
+            </span>
           </div>
         </div>
       )}

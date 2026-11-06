@@ -2,6 +2,7 @@ import React from 'react';
 import { FileSpreadsheet, Printer } from 'lucide-react';
 import Button from './ui/Button';
 import RajilLogo from './brand/RajilLogo';
+import ActionFeedback, { useActionFeedback } from './ui/ActionFeedback';
 import { exportToCSV } from '../utils/financialEngine';
 import { formatMoney, formatPercent, formatPayback } from '../utils/format';
 
@@ -14,7 +15,7 @@ const TEAM = [
 
 function SectionTitle({ number, children }) {
   return (
-    <h2 className="text-sm font-semibold text-ink border-b border-line-strong pb-1.5 mb-3">
+    <h2 className="text-callout font-semibold text-ink border-b border-line-strong pb-1.5 mb-3">
       {number}. {children}
     </h2>
   );
@@ -43,6 +44,8 @@ export default function ReportsView({
   const pessimistic = scenarios.find((s) => s.id === 'pessimistic');
   const money = (v) => formatMoney(v, currencySymbol);
 
+  const exportFeedback = useActionFeedback();
+
   const handleDownloadPDF = () => {
     window.print();
   };
@@ -65,6 +68,7 @@ export default function ReportsView({
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    exportFeedback.show('CSV descargado');
   };
 
   const indicators = [
@@ -79,9 +83,10 @@ export default function ReportsView({
   return (
     <div className="space-y-4">
       {/* Acciones */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 print:hidden">
-        <p className="text-[13px] text-ink-2">Vista previa del dictamen. Use “Imprimir / PDF” y elija “Guardar como PDF”.</p>
-        <div className="flex items-center gap-2">
+      <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 print:hidden">
+        <p className="text-footnote text-ink-2">Vista previa del dictamen. Use “Imprimir / PDF” y elija “Guardar como PDF”.</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <ActionFeedback {...exportFeedback} className="mr-1" />
           <Button onClick={handleExportCSV}>
             <FileSpreadsheet className="w-4 h-4" />
             Exportar CSV
@@ -99,9 +104,9 @@ export default function ReportsView({
         <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b-2 border-ink pb-4">
           <div>
             <RajilLogo size={26} />
-            <h1 className="text-xl font-bold text-ink mt-3">Dictamen financiero</h1>
+            <h1 className="font-display text-[22px] leading-7 font-bold tracking-[-0.015em] text-ink mt-3">Dictamen financiero</h1>
           </div>
-          <div className="text-xs text-ink-2 sm:text-right leading-relaxed">
+          <div className="text-footnote text-ink-2 sm:text-right leading-relaxed">
             <div>Universidad del Valle de Guatemala · Campus Sololá</div>
             <div>Contabilidad Financiera</div>
             <div>Fecha: {new Date().toLocaleDateString('es-GT')}</div>
@@ -109,7 +114,7 @@ export default function ReportsView({
         </header>
 
         {/* Datos generales */}
-        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-callout">
           {[
             ['Empresa', inputs.companyName],
             ['NIT', inputs.nit],
@@ -127,7 +132,7 @@ export default function ReportsView({
 
         <section className="avoid-break">
           <SectionTitle number={1}>Dictamen</SectionTitle>
-          <p className="text-sm leading-relaxed text-justify">
+          <p className="text-callout leading-relaxed text-justify">
             Con base en las proyecciones financieras de <strong>{inputs.companyName}</strong>, el proyecto de inversión
             presenta condiciones <strong>{isViable ? 'favorables' : 'desfavorables'}</strong>.{' '}
             {isViable
@@ -139,7 +144,7 @@ export default function ReportsView({
         <section className="avoid-break">
           <SectionTitle number={2}>Indicadores de decisión</SectionTitle>
           <div className="overflow-x-auto print:overflow-visible">
-          <table className="w-full text-sm border-collapse">
+          <table className="w-full text-callout border-collapse">
             <thead>
               <tr className="border-b border-line-strong text-ink-2">
                 <th scope="col" className="py-2 pr-4 text-left font-medium">Indicador</th>
@@ -164,7 +169,7 @@ export default function ReportsView({
 
         <section className="avoid-break">
           <SectionTitle number={3}>Recomendaciones</SectionTitle>
-          <ol className="list-decimal pl-5 space-y-2.5 text-sm leading-relaxed">
+          <ol className="list-decimal pl-5 space-y-2.5 text-callout leading-relaxed">
             <li>
               <strong>Decisión sobre la inversión.</strong>{' '}
               {isViable
@@ -187,16 +192,16 @@ export default function ReportsView({
 
         {/* Firmas */}
         <section className="pt-10 avoid-break">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center text-footnote">
             {TEAM.map((m) => (
               <div key={m.name} className="border-t border-ink-3 pt-2">
-                <div className="font-semibold text-ink text-sm">{m.name}</div>
+                <div className="font-semibold text-ink text-callout">{m.name}</div>
                 <div className="text-ink-2">{m.role}</div>
                 <div className="text-ink-2">{m.area}</div>
               </div>
             ))}
           </div>
-          <p className="text-center text-xs text-ink-2 mt-8">
+          <p className="text-center text-footnote text-ink-2 mt-8">
             Catedrática: Licda. Gloria León · Contabilidad Financiera · Universidad del Valle de Guatemala, Campus Sololá
           </p>
         </section>

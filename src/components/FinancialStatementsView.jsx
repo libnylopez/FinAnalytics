@@ -25,7 +25,7 @@ export default function FinancialStatementsView({ incomeStatement, cashFlow, cur
           value={activeStatement}
           onChange={setActiveStatement}
         />
-        <label className="flex items-center gap-2 text-[13px] text-ink-2 cursor-pointer select-none">
+        <label className="flex items-center gap-2 text-footnote text-ink-2 cursor-pointer select-none">
           <input
             type="checkbox"
             checked={showFormulas}
@@ -38,25 +38,25 @@ export default function FinancialStatementsView({ incomeStatement, cashFlow, cur
 
       {/* Documento */}
       <section className="bg-surface border border-line rounded-card shadow-card overflow-hidden" role="tabpanel" aria-label={current.title}>
-        <header className="px-5 pt-4 pb-3.5">
-          <h2 className="text-[15px] font-semibold text-ink">{current.title}</h2>
-          <p className="text-[13px] text-ink-2 mt-0.5">
+        <header className="px-6 pt-4 pb-3.5">
+          <h2 className="font-display text-headline font-bold text-ink">{current.title}</h2>
+          <p className="text-footnote text-ink-2 mt-0.5">
             Cifras en {currencySymbol === 'Q' ? 'quetzales (Q)' : 'dólares ($)'} · Proyección anual a 5 años
           </p>
         </header>
 
         <div className="overflow-x-auto border-t border-line">
-          <table className="w-full text-sm border-collapse">
+          <table className="w-full text-callout border-collapse">
             <thead>
               <tr className="bg-surface-2 text-ink-2">
-                <th scope="col" className="sticky left-0 z-10 bg-surface-2 py-2.5 px-5 text-left text-xs font-medium min-w-[10.5rem] sm:min-w-[15rem]">
+                <th scope="col" className="sticky left-0 z-10 bg-surface-2 py-3 px-6 text-left text-footnote font-medium min-w-[10.5rem] sm:min-w-[15rem]">
                   Concepto
                 </th>
                 {showFormulas && (
-                  <th scope="col" className="py-2.5 px-4 text-left text-xs font-medium min-w-[14rem]">Fórmula</th>
+                  <th scope="col" className="py-3 px-4 text-left text-footnote font-medium min-w-[14rem]">Fórmula</th>
                 )}
                 {data.years.map((yr) => (
-                  <th key={yr} scope="col" className="py-2.5 px-4 text-right text-xs font-medium whitespace-nowrap">
+                  <th key={yr} scope="col" className="py-3 px-4 text-right text-footnote font-medium whitespace-nowrap">
                     {yr}
                   </th>
                 ))}
@@ -75,19 +75,19 @@ export default function FinancialStatementsView({ incomeStatement, cashFlow, cur
                 return (
                   <tr key={row.id} className={`group ${rowClass} transition-colors duration-100 hover:bg-surface-2`}>
                     <td
-                      className={`sticky left-0 z-10 bg-surface group-hover:bg-surface-2 transition-colors duration-100 py-2.5 px-5 ${
-                        isHeading ? '' : 'pl-9 text-ink-2'
+                      className={`sticky left-0 z-10 bg-surface group-hover:bg-surface-2 transition-colors duration-100 py-3 px-6 ${
+                        isHeading ? '' : 'pl-11 text-ink-2'
                       }`}
                     >
                       {row.label}
                     </td>
                     {showFormulas && (
-                      <td className="py-2.5 px-4 text-xs font-normal text-ink-2">{row.formula}</td>
+                      <td className="py-3 px-4 text-footnote font-normal text-ink-2">{row.formula}</td>
                     )}
                     {row.values.map((val, idx) => (
                       <td
                         key={idx}
-                        className={`py-2.5 px-4 text-right whitespace-nowrap table-number ${
+                        className={`py-3 px-4 text-right whitespace-nowrap table-number ${
                           isNegativeAmount(val) ? 'text-negative' : ''
                         } ${row.isTotal ? 'border-b-[3px] border-double border-ink-3' : ''}`}
                       >
@@ -101,7 +101,7 @@ export default function FinancialStatementsView({ incomeStatement, cashFlow, cur
           </table>
         </div>
 
-        <footer className="px-5 py-3 border-t border-line text-xs text-ink-2">
+        <footer className="px-6 py-3 border-t border-line text-footnote text-ink-2">
           {activeStatement === 'income'
             ? 'Las líneas marcadas con (-) se restan. Las cifras entre paréntesis son negativas.'
             : 'Flujo libre = utilidad neta + depreciación ± variación del capital de trabajo. Las cifras entre paréntesis son salidas de efectivo.'}
