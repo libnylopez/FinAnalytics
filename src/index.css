@@ -5,7 +5,8 @@
 /*
  * Tokens de color (canales RGB para admitir opacidad en Tailwind).
  * Contraste medido (WCAG) sobre la superficie de cada modo:
- *   claro  — ink 16.8:1 · ink-2 5.1:1 · accent 5.5:1 · positive 5.0:1 · negative 5.7:1 · warning 5.2:1
+ *   claro  — ink 16.8:1 · ink-2 6.0:1 · accent 5.5:1 · positive 6.1:1 · negative 6.4:1 · warning 6.1:1
+ *   (sobre los fondos tintados de las cápsulas de estado se mantiene ≥ 4.5:1)
  *   oscuro — ink 14.7:1 · ink-2 6.4:1 · accent 6.3:1 · positive 7.7:1 · negative 5.9:1 · warning 8.1:1
  * ink-3 se reserva para iconos y elementos no textuales (≥ 3:1).
  *
@@ -24,13 +25,13 @@
   --line: 229 229 234;
   --line-strong: 209 209 214;
   --ink: 29 29 31;
-  --ink-2: 110 110 115;
+  --ink-2: 99 99 102;
   --ink-3: 142 142 147;
   --accent: 10 100 216;
   --primary: 29 78 216;
-  --positive: 26 127 69;
-  --negative: 196 41 28;
-  --warning: 161 92 0;
+  --positive: 21 112 64;
+  --negative: 184 38 26;
+  --warning: 147 82 0;
   --chart-1: 42 120 214;
   --chart-2: 235 104 52;
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 2px 8px rgb(0 0 0 / 0.03);

@@ -20,7 +20,7 @@ export default function Panel({
     <Tag className={`bg-surface border border-line rounded-card shadow-card ${className}`}>
       {hasHeader && (
         <header
-          className={`flex flex-col sm:flex-row sm:items-start justify-between gap-x-4 gap-y-2 px-5 pt-4 ${
+          className={`flex flex-wrap items-start justify-between gap-x-4 gap-y-2 px-5 pt-4 ${
             divided ? 'pb-3.5 border-b border-line' : 'pb-3'
           }`}
         >

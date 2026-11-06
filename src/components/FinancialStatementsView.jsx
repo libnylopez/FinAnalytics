@@ -49,7 +49,7 @@ export default function FinancialStatementsView({ incomeStatement, cashFlow, cur
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="bg-surface-2 text-ink-2">
-                <th scope="col" className="sticky left-0 z-10 bg-surface-2 py-2.5 px-5 text-left text-xs font-medium min-w-[15rem]">
+                <th scope="col" className="sticky left-0 z-10 bg-surface-2 py-2.5 px-5 text-left text-xs font-medium min-w-[10.5rem] sm:min-w-[15rem]">
                   Concepto
                 </th>
                 {showFormulas && (

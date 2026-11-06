@@ -54,7 +54,8 @@ export default function DashboardOverview({
     },
     {
       label: 'Período de recuperación',
-      value: formatPayback(paybackYears, paybackRecovered),
+      // Texto corto en la tarjeta; el criterio de abajo indica el horizonte
+      value: paybackRecovered ? formatPayback(paybackYears, true) : 'No se recupera',
       ok: paybackRecovered,
       note: paybackRecovered ? 'Dentro del horizonte de 5 años' : 'Fuera del horizonte de 5 años'
     }
