@@ -35,7 +35,7 @@ export default function RatiosDashboardView({ ratios, currencySymbol }) {
         </div>
       </div>
 
-      <section className="bg-surface border border-line rounded-card shadow-card overflow-hidden">
+      <section className="bg-surface border border-line rounded-[14px] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-callout border-collapse">
             <thead>

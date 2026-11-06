@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import Button from './ui/Button';
 import { RajilMark } from './brand/RajilLogo';
+import AtitlanLandscape from './brand/AtitlanLandscape';
 
 export default function TeamModal({ isOpen, onClose, projectInfo }) {
   const closeRef = useRef(null);
@@ -54,8 +55,10 @@ export default function TeamModal({ isOpen, onClose, projectInfo }) {
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="flex items-start justify-between gap-4 px-6 pt-5 pb-4 border-b border-line">
-          <div className="flex items-center gap-3">
+        <header className="relative overflow-hidden flex items-start justify-between gap-4 px-6 pt-5 pb-4 border-b border-line">
+          {/* Identidad institucional: Lago de Atitlán, muy discreto y estático */}
+          <AtitlanLandscape fit="meet" fade="both" className="absolute right-0 bottom-0 h-[84px] w-[517px] max-w-full opacity-80" />
+          <div className="relative flex items-center gap-3">
             <RajilMark size={30} />
             <div>
               <h2 id="team-modal-title" className="font-display text-[19px] leading-7 font-bold tracking-[-0.015em] text-ink">
@@ -71,7 +74,7 @@ export default function TeamModal({ isOpen, onClose, projectInfo }) {
             type="button"
             onClick={requestClose}
             aria-label="Cerrar"
-            className="w-8 h-8 grid place-items-center rounded-full text-ink-2 bg-ink/[0.06] hover:bg-ink/10 hover:text-ink cursor-pointer transition-colors duration-150"
+            className="relative w-8 h-8 grid place-items-center rounded-full text-ink-2 bg-surface/80 ring-1 ring-line hover:bg-surface hover:text-ink cursor-pointer transition-colors duration-150"
           >
             <X className="w-4 h-4" />
           </button>

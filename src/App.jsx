@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import Sidebar, { MENU_ITEMS } from './components/Sidebar';
 import Header from './components/Header';
 import DashboardOverview from './components/DashboardOverview';
@@ -9,7 +9,7 @@ import InvestmentEvaluationView from './components/InvestmentEvaluationView';
 import ReportsView from './components/ReportsView';
 import TeamModal from './components/TeamModal';
 import useTheme from './hooks/useTheme';
-import AtitlanLandscape from './components/brand/AtitlanLandscape';
+import PageIntro from './components/ui/PageIntro';
 
 import {
   defaultFinancialInputs,
@@ -34,6 +34,26 @@ export default function App() {
   const [currency, setCurrency] = useState('GTQ');
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
   const { preference: theme, setPreference: setTheme } = useTheme();
+
+  // Preferencia visual: barra lateral contraída (no afecta datos financieros)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('rajil_sidebar_collapsed') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('rajil_sidebar_collapsed', next ? '1' : '0');
+      } catch {
+        // sin almacenamiento: la preferencia dura solo esta sesión
+      }
+      return next;
+    });
+  }, []);
 
   // Estado central de entradas de la empresa
   const [inputs, setInputs] = useState(() => {
@@ -119,28 +139,25 @@ export default function App() {
 
   const activeTitle = MENU_ITEMS.find((item) => item.id === activeTab)?.label;
 
+  // Apertura de cada módulo (el Resumen tiene su propio titular, construido con los resultados)
+  const INTROS = {
+    inputs: 'Información de la empresa, inversión, ventas y parámetros que alimentan todo el análisis.',
+    statements: 'Estado de resultados y flujo de caja libre proyectados a cinco años.',
+    ratios: 'Once indicadores de liquidez, rentabilidad y endeudamiento con las cifras del año 1.',
+    evaluation: 'Criterios de decisión del proyecto y su sensibilidad ante cambios en las ventas.',
+    reports: 'Dictamen formal listo para imprimir o guardar como PDF, y exportación de datos.'
+  };
+
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-canvas text-ink print:bg-white">
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenTeamModal={() => setIsTeamModalOpen(true)}
+        collapsed={sidebarCollapsed}
       />
 
       <div className="relative flex-1 flex flex-col min-w-0">
-        {/* Lago de Atitlán: identidad discreta detrás del encabezado del Resumen (estático, decorativo) */}
-        {activeTab === 'dashboard' && (
-          <div className="hidden md:block absolute inset-x-0 top-0 h-[190px] pointer-events-none print:hidden" aria-hidden="true">
-            <div className="relative h-full max-w-6xl mx-auto">
-              <AtitlanLandscape
-                layers="premium"
-                fit="meet"
-                fade="both"
-                className="absolute top-0 right-0 h-full w-[min(1100px,100%)] animate-fade-in"
-              />
-            </div>
-          </div>
-        )}
         <Header
           title={activeTitle}
           companyData={inputs}
@@ -149,11 +166,19 @@ export default function App() {
           theme={theme}
           setTheme={setTheme}
           onOpenTeamModal={() => setIsTeamModalOpen(true)}
+          sidebarCollapsed={sidebarCollapsed}
+          onToggleSidebar={toggleSidebar}
         />
 
-        <main className="relative flex-1 w-full max-w-6xl mx-auto px-4 sm:px-8 pt-2 pb-16 print:p-0 print:max-w-none">
+        <main className="flex-1 px-2 sm:px-3 lg:pl-0 lg:pr-3 pb-3 print:p-0">
+          {/* Hoja de trabajo: una sola superficie elevada por módulo; las secciones se separan con espacio y filetes */}
+          <div className="sheet min-h-[calc(100vh-72px)] bg-surface border border-line rounded-[20px] shadow-sheet print:min-h-0 print:border-0 print:shadow-none print:rounded-none">
+          <div className="max-w-[1120px] mx-auto px-5 sm:px-10 pt-8 sm:pt-12 pb-14 print:p-0 print:max-w-none">
           {/* Cada módulo entra con un fundido breve; la clave reinicia la animación al cambiar de sección */}
           <div key={activeTab} className="animate-rise-in print:animate-none">
+          {activeTab !== 'dashboard' && (
+            <PageIntro title={activeTitle} description={INTROS[activeTab]} className="mb-10 print:hidden" />
+          )}
           {activeTab === 'dashboard' && (
             <DashboardOverview
               inputs={inputs}
@@ -210,6 +235,8 @@ export default function App() {
               currencySymbol={currencySymbol}
             />
           )}
+          </div>
+          </div>
           </div>
         </main>
       </div>

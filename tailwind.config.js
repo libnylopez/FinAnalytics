@@ -85,6 +85,7 @@ export default {
       boxShadow: {
         card: 'var(--shadow-card)',
         raised: 'var(--shadow-raised)',
+        sheet: 'var(--shadow-sheet)',
         pop: 'var(--shadow-pop)',
         segment: 'var(--shadow-segment)',
         focus: '0 0 0 4px rgb(var(--accent) / 0.16)',

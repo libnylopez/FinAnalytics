@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, RotateCcw, Calculator } from 'lucide-react';
-import Panel from './ui/Panel';
 import Button from './ui/Button';
 import Disclosure from './ui/Disclosure';
-import { StatusIcon } from './ui/StatusLabel';
+import StatusLabel, { StatusIcon } from './ui/StatusLabel';
 import ActionFeedback, { useActionFeedback } from './ui/ActionFeedback';
 import { formatMoney, formatNumber } from '../utils/format';
 
@@ -19,6 +18,20 @@ function Field({ label, htmlFor, hint, children }) {
       {children}
       {hint && <p className="text-footnote text-ink-2 mt-1.5 min-h-[18px]">{hint}</p>}
     </div>
+  );
+}
+
+/** Sección de formulario: título y propósito a la izquierda, campos a la derecha. */
+function FormSection({ title, description, aside, children }) {
+  return (
+    <section className="grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-5 py-9 border-b border-line last:border-b-0">
+      <div className="lg:col-span-4">
+        <h2 className="font-display text-headline font-bold text-ink">{title}</h2>
+        {description && <p className="mt-1.5 text-callout text-ink-2 max-w-xs">{description}</p>}
+        {aside && <div className="mt-4">{aside}</div>}
+      </div>
+      <div className="lg:col-span-8 min-w-0">{children}</div>
+    </section>
   );
 }
 
@@ -118,12 +131,13 @@ export default function DataInputView({
 
   const salesKeys = ['salesY1', 'salesY2', 'salesY3', 'salesY4', 'salesY5'];
   const totalSales = salesKeys.reduce((sum, key) => sum + (Number(inputs[key]) || 0), 0);
-  const hasProblems = validations.some((v) => v.type !== 'success');
+
+  const problems = validations.filter((v) => v.type !== 'success');
 
   return (
-    <div className="space-y-6">
-      {/* Barra de acciones */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface border border-line rounded-card shadow-card px-5 py-4">
+    <div>
+      {/* Acciones del conjunto de datos */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <label htmlFor="preset" className="text-callout font-medium text-ink">
             Datos de ejemplo
@@ -162,10 +176,52 @@ export default function DataInputView({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Formulario */}
-        <div className="lg:col-span-2 space-y-6">
-          <Panel title="Información de la empresa">
+      {/* Estado del conjunto: inversión total y validación, siempre a la vista */}
+      <div className="border border-line rounded-[16px]">
+        <div className="flex flex-wrap items-center gap-x-10 gap-y-4 px-5 py-4">
+          <div>
+            <div className="eyebrow">Inversión inicial</div>
+            <div className="mt-1 font-display text-[26px] leading-8 font-semibold tracking-[-0.03em] text-ink table-number">
+              {formatMoney(totalInvestment, currencySymbol)}
+            </div>
+          </div>
+          <dl className="flex flex-wrap gap-x-8 gap-y-2 text-footnote">
+            {[
+              ['Maquinaria y equipo', inputs.machinery],
+              ['Mobiliario e instalaciones', inputs.furniture],
+              ['Capital de trabajo', inputs.workingCapital]
+            ].map(([label, value]) => (
+              <div key={label}>
+                <dt className="text-ink-2">{label}</dt>
+                <dd className="text-callout font-medium text-ink table-number">{formatMoney(Number(value) || 0, currencySymbol)}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="ml-auto" aria-live="polite">
+            {problems.length === 0 ? (
+              <StatusLabel status="optimal" size="md">Datos consistentes</StatusLabel>
+            ) : (
+              <StatusLabel status={problems.some((v) => v.type === 'danger') ? 'danger' : 'warning'} size="md">
+                {problems.length} {problems.length === 1 ? 'observación' : 'observaciones'}
+              </StatusLabel>
+            )}
+          </div>
+        </div>
+        {problems.length > 0 && (
+          <ul className="border-t border-line px-5 py-3 space-y-2">
+            {problems.map((v) => (
+              <li key={v.message} className="flex items-start gap-2.5 text-callout text-ink animate-rise-in">
+                <StatusIcon status={v.type} className="w-4 h-4 mt-0.5" />
+                {v.message}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Secciones: título y propósito a la izquierda, campos a la derecha */}
+      <div className="mt-4">
+        <FormSection title="Información de la empresa" description="Identificación de la empresa que se evalúa.">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
               <Field label="Nombre o razón social" htmlFor="companyName">
                 <input
@@ -204,9 +260,9 @@ export default function DataInputView({
                 </Select>
               </Field>
             </div>
-          </Panel>
+        </FormSection>
 
-          <Panel title="Inversión inicial" description="Desembolso del año 0 para la puesta en marcha.">
+        <FormSection title="Inversión inicial" description="Desembolso del año 0 para la puesta en marcha.">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Field label="Maquinaria y equipo" htmlFor="machinery">
                 <NumberInput id="machinery" prefix={currencySymbol} min="0" invalid={invalid.investment} value={inputs.machinery} onChange={(v) => handleInputChange('machinery', v)} />
@@ -218,18 +274,18 @@ export default function DataInputView({
                 <NumberInput id="workingCapital" prefix={currencySymbol} min="0" invalid={invalid.investment} value={inputs.workingCapital} onChange={(v) => handleInputChange('workingCapital', v)} />
               </Field>
             </div>
-          </Panel>
+        </FormSection>
 
-          <Panel
-            title="Proyección de ventas"
-            description="Ventas anuales estimadas para los 5 años del horizonte."
-            actions={
-              <div className="text-right">
-                <div className="text-footnote text-ink-2">Total 5 años</div>
-                <div className="font-display text-headline font-bold text-ink table-number">{formatMoney(totalSales, currencySymbol)}</div>
-              </div>
-            }
-          >
+        <FormSection
+          title="Proyección de ventas"
+          description="Ventas anuales estimadas para los 5 años del horizonte."
+          aside={
+            <div>
+              <div className="text-footnote text-ink-2">Total 5 años</div>
+              <div className="font-display text-headline font-bold text-ink table-number">{formatMoney(totalSales, currencySymbol)}</div>
+            </div>
+          }
+        >
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
               {salesKeys.map((key, idx) => {
                 const prev = idx > 0 ? Number(inputs[salesKeys[idx - 1]]) : 0;
@@ -312,9 +368,9 @@ export default function DataInputView({
                 </div>
               </Disclosure>
             </div>
-          </Panel>
+        </FormSection>
 
-          <Panel title="Costos y gastos">
+        <FormSection title="Costos y gastos" description="Costo de ventas como porcentaje y gastos operativos anuales.">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Field label="Costo de ventas" htmlFor="costPercentage" hint="Porcentaje sobre las ventas">
                 <NumberInput id="costPercentage" suffix="%" step="0.1" min="0" invalid={invalid.costPercentage} value={inputs.costPercentage} onChange={(v) => handleInputChange('costPercentage', v)} />
@@ -326,11 +382,10 @@ export default function DataInputView({
                 <NumberInput id="salesExpenses" prefix={currencySymbol} min="0" value={inputs.salesExpenses} onChange={(v) => handleInputChange('salesExpenses', v)} />
               </Field>
             </div>
-          </Panel>
+        </FormSection>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Panel title="Financiamiento">
-              <div className="grid grid-cols-1 gap-4">
+        <FormSection title="Financiamiento" description="Préstamo bancario y su tasa de interés.">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Préstamo bancario" htmlFor="bankDebt" hint="Se amortiza 20% por año">
                   <NumberInput id="bankDebt" prefix={currencySymbol} min="0" value={inputs.bankDebt} onChange={(v) => handleInputChange('bankDebt', v)} />
                 </Field>
@@ -338,10 +393,10 @@ export default function DataInputView({
                   <NumberInput id="interestRate" suffix="%" step="0.1" min="0" value={inputs.interestRate} onChange={(v) => handleInputChange('interestRate', v)} />
                 </Field>
               </div>
-            </Panel>
+        </FormSection>
 
-            <Panel title="Parámetros financieros">
-              <div className="grid grid-cols-1 gap-4">
+        <FormSection title="Parámetros financieros" description="Rendimiento mínimo exigido e impuesto sobre la renta.">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Tasa de descuento (WACC)" htmlFor="wacc" hint="Rendimiento mínimo exigido; se usa para el VPN">
                   <NumberInput id="wacc" suffix="%" step="0.1" invalid={invalid.wacc} value={inputs.wacc} onChange={(v) => handleInputChange('wacc', v)} />
                 </Field>
@@ -349,52 +404,14 @@ export default function DataInputView({
                   <NumberInput id="taxRate" suffix="%" step="0.1" min="0" value={inputs.taxRate} onChange={(v) => handleInputChange('taxRate', v)} />
                 </Field>
               </div>
-            </Panel>
-          </div>
+        </FormSection>
+      </div>
 
-          <div className="flex justify-end">
-            <Button variant="primary" onClick={() => onNavigate('statements')}>
-              Ver estados financieros
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Columna lateral: resumen y validación */}
-        <div className="space-y-6 lg:sticky lg:top-[136px]">
-          <Panel title="Inversión inicial">
-            <dl className="space-y-3 text-callout">
-              {[
-                ['Maquinaria y equipo', inputs.machinery],
-                ['Mobiliario e instalaciones', inputs.furniture],
-                ['Capital de trabajo', inputs.workingCapital]
-              ].map(([label, value]) => (
-                <div key={label} className="flex justify-between gap-4">
-                  <dt className="text-ink-2">{label}</dt>
-                  <dd className="text-ink table-number">{formatMoney(Number(value) || 0, currencySymbol)}</dd>
-                </div>
-              ))}
-              <div className="flex items-baseline justify-between gap-4 pt-4 mt-1 border-t border-line">
-                <dt className="font-semibold text-ink">Total</dt>
-                <dd className="font-display text-figure-sm font-bold text-ink table-number">{formatMoney(totalInvestment, currencySymbol)}</dd>
-              </div>
-            </dl>
-          </Panel>
-
-          <Panel
-            title="Validación de datos"
-            description={hasProblems ? 'Revise las observaciones antes de continuar.' : 'Los datos ingresados son consistentes.'}
-          >
-            <ul className="space-y-3" aria-live="polite">
-              {validations.map((v, i) => (
-                <li key={v.message} className="flex items-start gap-2.5 text-callout animate-rise-in">
-                  <StatusIcon status={v.type === 'success' ? 'optimal' : v.type} className="w-4 h-4 mt-0.5" />
-                  <span className={v.type === 'success' ? 'text-ink-2' : 'text-ink'}>{v.message}</span>
-                </li>
-              ))}
-            </ul>
-          </Panel>
-        </div>
+      <div className="flex justify-end pt-8 border-t border-line">
+        <Button variant="primary" onClick={() => onNavigate('statements')}>
+          Ver estados financieros
+          <ChevronRight className="w-4 h-4" />
+        </Button>
       </div>
     </div>
   );

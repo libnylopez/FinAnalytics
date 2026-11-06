@@ -37,7 +37,7 @@ export default function FinancialStatementsView({ incomeStatement, cashFlow, cur
       </div>
 
       {/* Documento */}
-      <section className="bg-surface border border-line rounded-card shadow-card overflow-hidden" role="tabpanel" aria-label={current.title}>
+      <section className="bg-surface border border-line rounded-[14px] overflow-hidden" role="tabpanel" aria-label={current.title}>
         <header className="px-6 pt-4 pb-3.5">
           <h2 className="font-display text-headline font-bold text-ink">{current.title}</h2>
           <p className="text-footnote text-ink-2 mt-0.5">

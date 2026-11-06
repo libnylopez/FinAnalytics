@@ -18,7 +18,7 @@ export default function Panel({
   const hasHeader = title || actions;
   const bodyClass = bodyClassName ?? (hasHeader ? (divided ? 'p-6' : 'px-6 pb-6') : 'p-6');
   return (
-    <Tag className={`bg-surface border border-line rounded-card shadow-card ${className}`}>
+    <Tag className={`bg-surface border border-line rounded-[14px] ${className}`}>
       {hasHeader && (
         <header
           className={`flex flex-wrap items-start justify-between gap-x-4 gap-y-2 px-6 pt-5 ${

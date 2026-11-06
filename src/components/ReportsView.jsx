@@ -81,7 +81,7 @@ export default function ReportsView({
   const ratioAlerts = ratios.filter((r) => r.status !== 'optimal');
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Acciones */}
       <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 print:hidden">
         <p className="text-footnote text-ink-2">Vista previa del dictamen. Use “Imprimir / PDF” y elija “Guardar como PDF”.</p>
@@ -99,6 +99,8 @@ export default function ReportsView({
       </div>
 
       {/* Documento */}
+      {/* Mesa de trabajo: fondo hundido para que la hoja se lea como papel; al imprimir desaparece */}
+      <div className="rounded-[18px] bg-canvas border border-line px-3 py-6 sm:px-8 sm:py-10 print:bg-transparent print:border-0 print:p-0">
       {/* El documento conserva colores de papel en ambos temas (clase paper) */}
       <article className="paper bg-surface text-ink border border-line rounded-card shadow-pop max-w-4xl mx-auto px-6 py-8 sm:px-12 sm:py-12 space-y-8 print:border-0 print:shadow-none print:rounded-none print:p-0 print:max-w-none">
         <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b-2 border-ink pb-4">
@@ -206,6 +208,7 @@ export default function ReportsView({
           </p>
         </section>
       </article>
+      </div>
     </div>
   );
 }
