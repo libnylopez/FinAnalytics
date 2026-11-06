@@ -13,7 +13,7 @@ const TEAM = [
 
 function SectionTitle({ number, children }) {
   return (
-    <h2 className="text-sm font-semibold text-slate-900 border-b border-slate-300 pb-1.5 mb-3">
+    <h2 className="text-sm font-semibold text-ink border-b border-line-strong pb-1.5 mb-3">
       {number}. {children}
     </h2>
   );
@@ -79,7 +79,7 @@ export default function ReportsView({
     <div className="space-y-4">
       {/* Acciones */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 print:hidden">
-        <p className="text-sm text-slate-600">Vista previa del dictamen. Use “Imprimir / PDF” y elija “Guardar como PDF”.</p>
+        <p className="text-[13px] text-ink-2">Vista previa del dictamen. Use “Imprimir / PDF” y elija “Guardar como PDF”.</p>
         <div className="flex items-center gap-2">
           <Button onClick={handleExportCSV}>
             <FileSpreadsheet className="w-4 h-4" />
@@ -93,13 +93,14 @@ export default function ReportsView({
       </div>
 
       {/* Documento */}
-      <article className="bg-white border border-slate-200 rounded-md max-w-4xl mx-auto px-6 py-8 sm:px-12 sm:py-10 text-slate-800 space-y-8 print:border-0 print:p-0 print:max-w-none">
-        <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b-2 border-slate-800 pb-4">
+      {/* El documento conserva colores de papel en ambos temas (clase paper) */}
+      <article className="paper bg-surface text-ink border border-line rounded-card shadow-pop max-w-4xl mx-auto px-6 py-8 sm:px-12 sm:py-12 space-y-8 print:border-0 print:shadow-none print:rounded-none print:p-0 print:max-w-none">
+        <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b-2 border-ink pb-4">
           <div>
-            <div className="text-xs uppercase tracking-wide text-slate-500">FinAnalytics</div>
-            <h1 className="text-xl font-bold text-slate-900 mt-0.5">Dictamen financiero</h1>
+            <div className="text-xs uppercase tracking-wide text-ink-2">FinAnalytics</div>
+            <h1 className="text-xl font-bold text-ink mt-0.5">Dictamen financiero</h1>
           </div>
-          <div className="text-xs text-slate-600 sm:text-right leading-relaxed">
+          <div className="text-xs text-ink-2 sm:text-right leading-relaxed">
             <div>Universidad del Valle de Guatemala · Campus Sololá</div>
             <div>Contabilidad Financiera</div>
             <div>Fecha: {new Date().toLocaleDateString('es-GT')}</div>
@@ -116,9 +117,9 @@ export default function ReportsView({
             ['Inversión inicial', money(initialCost)],
             ['Tasa de descuento (WACC)', `${formatPercent(wacc)} anual`]
           ].map(([label, value]) => (
-            <div key={label} className="flex justify-between gap-4 border-b border-slate-100 pb-1.5">
-              <dt className="text-slate-500">{label}</dt>
-              <dd className="font-medium text-slate-900 text-right table-number">{value}</dd>
+            <div key={label} className="flex justify-between gap-4 border-b border-line pb-1.5">
+              <dt className="text-ink-2">{label}</dt>
+              <dd className="font-medium text-ink text-right table-number">{value}</dd>
             </div>
           ))}
         </dl>
@@ -139,20 +140,20 @@ export default function ReportsView({
           <div className="overflow-x-auto print:overflow-visible">
           <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="border-b border-slate-400 text-slate-600">
+              <tr className="border-b border-line-strong text-ink-2">
                 <th scope="col" className="py-2 pr-4 text-left font-medium">Indicador</th>
                 <th scope="col" className="py-2 px-4 text-right font-medium">Resultado</th>
                 <th scope="col" className="py-2 px-4 text-left font-medium">Criterio</th>
                 <th scope="col" className="py-2 pl-4 text-left font-medium">Evaluación</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-line">
               {indicators.map(([name, result, rule, ok]) => (
                 <tr key={name}>
                   <td className="py-2 pr-4">{name}</td>
                   <td className="py-2 px-4 text-right font-medium table-number whitespace-nowrap">{result}</td>
-                  <td className="py-2 px-4 text-slate-600">{rule}</td>
-                  <td className={`py-2 pl-4 font-medium ${ok ? 'text-emerald-700' : 'text-rose-700'}`}>{ok ? 'Cumple' : 'No cumple'}</td>
+                  <td className="py-2 px-4 text-ink-2">{rule}</td>
+                  <td className={`py-2 pl-4 font-medium ${ok ? 'text-positive' : 'text-negative'}`}>{ok ? 'Cumple' : 'No cumple'}</td>
                 </tr>
               ))}
             </tbody>
@@ -187,14 +188,14 @@ export default function ReportsView({
         <section className="pt-10 avoid-break">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center text-xs">
             {TEAM.map((m) => (
-              <div key={m.name} className="border-t border-slate-400 pt-2">
-                <div className="font-semibold text-slate-900 text-sm">{m.name}</div>
-                <div className="text-slate-600">{m.role}</div>
-                <div className="text-slate-500">{m.area}</div>
+              <div key={m.name} className="border-t border-ink-3 pt-2">
+                <div className="font-semibold text-ink text-sm">{m.name}</div>
+                <div className="text-ink-2">{m.role}</div>
+                <div className="text-ink-2">{m.area}</div>
               </div>
             ))}
           </div>
-          <p className="text-center text-xs text-slate-500 mt-8">
+          <p className="text-center text-xs text-ink-2 mt-8">
             Catedrática: Licda. Gloria León · Contabilidad Financiera · Universidad del Valle de Guatemala, Campus Sololá
           </p>
         </section>
