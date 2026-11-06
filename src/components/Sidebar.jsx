@@ -6,7 +6,8 @@ import {
   Scale,
   Calculator,
   FileText,
-  Users
+  Users,
+  BarChart3
 } from 'lucide-react';
 
 export const MENU_ITEMS = [
@@ -18,21 +19,26 @@ export const MENU_ITEMS = [
   { id: 'reports', label: 'Reportes', icon: FileText }
 ];
 
+const itemBase =
+  'group relative flex items-center gap-3 h-9 px-3 rounded-lg text-sm whitespace-nowrap text-left cursor-pointer ' +
+  'transition-colors duration-150 ease-out';
+
 export default function Sidebar({ activeTab, setActiveTab, onOpenTeamModal }) {
   return (
-    <aside className="bg-white border-b lg:border-b-0 lg:border-r border-slate-200 flex flex-col shrink-0 lg:w-60 lg:h-screen lg:sticky lg:top-0 print:hidden">
-      {/* Identificación */}
-      <div className="px-5 pt-5 pb-4 lg:border-b border-slate-200">
-        <div className="text-base font-bold tracking-tight text-navy-900">FinAnalytics</div>
-        <div className="text-xs text-slate-500 mt-0.5 leading-snug">
-          <span>Contabilidad Financiera</span>
-          <span className="lg:hidden"> · </span>
-          <span className="lg:block">UVG Sololá</span>
+    <aside className="bg-sidebar border-b lg:border-b-0 lg:border-r border-line flex flex-col shrink-0 lg:w-64 lg:h-screen lg:sticky lg:top-0 print:hidden">
+      {/* Identidad */}
+      <div className="flex items-center gap-3 px-5 pt-5 pb-4 lg:pt-6 lg:pb-6">
+        <div className="w-8 h-8 rounded-[9px] bg-primary text-white grid place-items-center shadow-sm shrink-0" aria-hidden="true">
+          <BarChart3 className="w-[18px] h-[18px]" strokeWidth={2.25} />
+        </div>
+        <div className="min-w-0 leading-tight">
+          <div className="text-[15px] font-semibold tracking-tight text-ink">FinAnalytics</div>
+          <div className="text-xs text-ink-2 mt-0.5">Contabilidad Financiera · UVG</div>
         </div>
       </div>
 
       {/* Navegación */}
-      <nav className="flex lg:flex-col gap-1 overflow-x-auto px-3 pb-3 lg:py-4 lg:flex-1" aria-label="Secciones">
+      <nav className="flex lg:flex-col gap-1 overflow-x-auto px-3 pb-3 lg:pb-4 lg:flex-1" aria-label="Secciones">
         {MENU_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -42,16 +48,16 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenTeamModal }) {
               type="button"
               onClick={() => setActiveTab(item.id)}
               aria-current={isActive ? 'page' : undefined}
-              className={`relative flex items-center gap-3 whitespace-nowrap px-3 py-2 rounded text-sm text-left transition-colors cursor-pointer ${
-                isActive
-                  ? 'bg-navy-50 text-navy-900 font-semibold'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              className={`${itemBase} ${
+                isActive ? 'bg-accent/10 text-accent font-semibold' : 'text-ink-2 hover:bg-ink/[0.05] hover:text-ink'
               }`}
             >
-              {isActive && (
-                <span className="hidden lg:block absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r bg-navy-800" aria-hidden="true" />
-              )}
-              <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-navy-800' : 'text-slate-400'}`} />
+              <Icon
+                className={`w-[18px] h-[18px] shrink-0 transition-colors duration-150 ${
+                  isActive ? 'text-accent' : 'text-ink-3 group-hover:text-ink-2'
+                }`}
+                strokeWidth={isActive ? 2.25 : 2}
+              />
               <span>{item.label}</span>
             </button>
           );
@@ -59,13 +65,13 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenTeamModal }) {
       </nav>
 
       {/* Información del proyecto */}
-      <div className="hidden lg:block px-3 py-3 border-t border-slate-200">
+      <div className="hidden lg:block px-3 py-3 border-t border-line">
         <button
           type="button"
           onClick={onOpenTeamModal}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer"
+          className={`${itemBase} w-full text-ink-2 hover:bg-ink/[0.05] hover:text-ink`}
         >
-          <Users className="w-4 h-4 text-slate-400" />
+          <Users className="w-[18px] h-[18px] text-ink-3 group-hover:text-ink-2 transition-colors duration-150" />
           <span>Equipo del proyecto</span>
         </button>
       </div>
